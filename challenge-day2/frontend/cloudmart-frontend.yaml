@@ -1,36 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cloudmart-frontend-app
+  name: cloudmart-backend-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cloudmart-frontend-app
+      app: cloudmart-backend-app
   template:
     metadata:
       labels:
-        app: cloudmart-frontend-app
+        app: cloudmart-backend-app
     spec:
       serviceAccountName: cloudmart-pod-execution-role
       containers:
-      - name: cloudmart-frontend-app
-<<<<<<< HEAD
-        image: public.ecr.aws/n8t4z4m3/cloudmaster-frontend:latest
-=======
+      - name: cloudmart-backend-app
         image: CONTAINER_IMAGE
->>>>>>> 1330a79 (Minha mensagem de commit)
+        env:
+        - name: PORT
+          value: "5000"
+        - name: AWS_REGION
+          value: "us-east-1"
+        - name: BEDROCK_AGENT_ID
+          value: "xxxxxx"
+        - name: BEDROCK_AGENT_ALIAS_ID
+          value: "xxxx"
+        - name: OPENAI_API_KEY
+          value: "xxxxxx"
+        - name: OPENAI_ASSISTANT_ID
+          value: "xxxx"
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: cloudmart-frontend-app-service
+  name: cloudmart-backend-app-service
 spec:
   type: LoadBalancer
   selector:
-    app: cloudmart-frontend-app
+    app: cloudmart-backend-app
   ports:
     - protocol: TCP
-      port: 5001
-      targetPort: 5001
+      port: 5000
+      targetPort: 5000
