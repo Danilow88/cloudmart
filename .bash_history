@@ -684,3 +684,154 @@ git commit -m "Atualizar o arquivo .gitignore para ignorar arquivos grandes"
 "
 ""
 clear
+# Create/edit .gitignore
+cat >> .gitignore << 'EOF'
+# Terraform files
+**/.terraform/*
+**/terraform-provider-aws*
+
+# Kubectl binary
+**/kubectl
+
+# Crash log files
+crash.log
+EOF
+
+# Remove kubectl from git tracking
+git rm --cached challenge-day2/backend/challenge-day2/kubectl
+# Remove terraform providers
+git rm --cached -r terraform-project/*/.terraform/
+git add .gitignore
+git commit -m "Update .gitignore for large files"
+git filter-branch --force --index-filter   'git rm --cached --ignore-unmatch challenge-day2/backend/challenge-day2/kubectl terraform-project/*/.terraform/providers/registry.terraform.io/hashicorp/aws/5.84.0/linux_amd64/terraform-provider-aws_v5.84.0_x5'   --prune-empty --tag-name-filter cat -- --all
+git push origin main --force
+sudo yum install git-lfs
+git lfs install
+sudo curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | sudo bash
+sudo yum install git-lfs
+git lfs install
+git add .gitattributes
+git commit -m "Adicionar suporte ao LFS para arquivos grandes"
+git commit -m "Adicionar suporte ao LFS para arquivos grandes" git opush
+git commit -m "Adicionar suporte ao LFS para arquivos grandes" git push
+git commit -m "Adicionar suporte ao LFS para arquivos grandes" git -a
+git status
+git add -A
+git commit -m "app enviada para o repo"
+git push
+git -m
+git status
+git reset --soft
+git status
+git reset --soft HEAD~12
+git status
+git lfs install
+git status
+git add -A
+git commit -m "app enviada para o repo"
+git push
+git reset --soft HEAD~1
+git push origin main
+git lfs install
+git lfs track "*.zip"
+git lfs track "*.mp4"
+git lfs track
+git lfs track -a
+git lfs track
+git add -A
+git commit -m "app enviada para o repo"
+git push origin main
+git reset --soft HEAD~2
+git reset --soft HEAD~1
+# 1. Inicialize o Git LFS no repositório (se ainda não fez)
+git lfs install
+# 2. Rastreie os tipos de arquivos grandes que você deseja gerenciar com LFS
+git lfs track "*.zip"                  # Rastreia arquivos .zip
+git lfs track "*.mp4"                  # Rastreia arquivos .mp4
+git lfs track "*.tar"                  # Rastreia arquivos .tar
+git lfs track "terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/*"  # Rastreia o arquivo do Terraform
+# 3. Remova os arquivos grandes do staging, caso já estejam lá (isso faz com que o LFS os gerencie corretamente)
+git rm --cached terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/5.84.0/linux_amd64/terraform-provider-aws_v5.84.0_x5
+git rm --cached kubectl
+# 4. Adicione o arquivo .gitattributes (que o LFS gerou) e os arquivos grandes novamente ao staging
+git add .gitattributes
+git add terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/5.84.0/linux_amd64/terraform-provider-aws_v5.84.0_x5
+git add kubectl
+# 5. Comite as mudanças
+git commit -m "Adicionando arquivos grandes ao Git LFS"
+# 6. Se os arquivos já estiverem no histórico do Git e você precisar removê-los, use o BFG Repo-Cleaner (se necessário)
+# Se não tiver o BFG, instale ou faça o download de https://rtyley.github.io/bfg-repo-cleaner/
+# Caso já tenha o BFG, execute os seguintes comandos:
+# Limpar arquivos grandes do histórico do Git (use o caminho e nome correto dos arquivos)
+bfg --delete-files 'kubectl' your-repo.git
+bfg --strip-blobs-bigger-than 50M your-repo.git
+# Após usar o BFG, execute os seguintes comandos para limpar o histórico local
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+# 7. Envie as mudanças para o repositório remoto
+git push origin main
+# 8. Se o repositório remoto já contiver arquivos grandes e o erro persistir, faça o push forçado para atualizar o histórico
+# Atenção: O "push --force" sobrescreverá o histórico do repositório remoto, então use com cuidado
+git push --force origin main
+clear
+# 1. Inicialize o Git LFS no repositório (se ainda não fez)
+git lfs install
+# 2. Rastreie os tipos de arquivos grandes que você deseja gerenciar com LFS
+git lfs track "*.zip"                  # Rastreia arquivos .zip
+git lfs track "*.mp4"                  # Rastreia arquivos .mp4
+git lfs track "*.tar"                  # Rastreia arquivos .tar
+git lfs track "terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/*"  # Rastreia o arquivo do Terraform
+# 3. Remova os arquivos grandes do staging, caso já estejam lá (isso faz com que o LFS os gerencie corretamente)
+git rm --cached terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/5.84.0/linux_amd64/terraform-provider-aws_v5.84.0_x5
+git rm --cached kubectl
+# 4. Adicione o arquivo .gitattributes (que o LFS gerou) e os arquivos grandes novamente ao staging
+git add .gitattributes
+git add terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/5.84.0/linux_amd64/terraform-provider-aws_v5.84.0_x5
+git add kubectl
+# 5. Comite as mudanças
+git commit -m "Adicionando arquivos grandes ao Git LFS"
+# 6. Se os arquivos já estiverem no histórico do Git e você precisar removê-los, use o BFG Repo-Cleaner (se necessário)
+# Se não tiver o BFG, instale ou faça o download de https://rtyley.github.io/bfg-repo-cleaner/
+# Caso já tenha o BFG, execute os seguintes comandos:
+# Limpar arquivos grandes do histórico do Git (use o caminho e nome correto dos arquivos)
+bfg --delete-files 'kubectl' your-repo.git
+bfg --strip-blobs-bigger-than 50M your-repo.git
+# Após usar o BFG, execute os seguintes comandos para limpar o histórico local
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+# 7. Envie as mudanças para o repositório remoto
+git push origin main
+# 8. Se o repositório remoto já contiver arquivos grandes e o erro persistir, faça o push forçado para atualizar o histórico
+# Atenção: O "push --force" sobrescreverá o histórico do repositório remoto, então use com cuidado
+git push --force origin main
+git reset --soft HEAD~1
+# 1. Inicialize o Git LFS no repositório (se ainda não fez)
+git lfs install
+# 2. Rastreie os tipos de arquivos grandes que você deseja gerenciar com LFS
+git lfs track "*.zip"                  # Rastreia arquivos .zip
+git lfs track "*.mp4"                  # Rastreia arquivos .mp4
+git lfs track "*.tar"                  # Rastreia arquivos .tar
+git lfs track "terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/*"  # Rastreia o arquivo do Terraform
+# 3. Remova os arquivos grandes do staging, caso já estejam lá (isso faz com que o LFS os gerencie corretamente)
+git rm --cached terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/5.84.0/linux_amd64/terraform-provider-aws_v5.84.0_x5
+git rm --cached kubectl
+# 4. Adicione o arquivo .gitattributes (que o LFS gerou) e os arquivos grandes novamente ao staging
+git add .gitattributes
+git add terraform-project/terraform-project/terraform-project/terraform-project/.terraform/providers/registry.terraform.io/hashicorp/aws/5.84.0/linux_amd64/terraform-provider-aws_v5.84.0_x5
+git add kubectl
+# 5. Comite as mudanças
+git commit -m "Adicionando arquivos grandes ao Git LFS"
+# 6. Se os arquivos já estiverem no histórico do Git e você precisar removê-los, use o BFG Repo-Cleaner (se necessário)
+# Se não tiver o BFG, instale ou faça o download de https://rtyley.github.io/bfg-repo-cleaner/
+# Caso já tenha o BFG, execute os seguintes comandos:
+# Limpar arquivos grandes do histórico do Git (use o caminho e nome correto dos arquivos)
+bfg --delete-files 'kubectl' your-repo.git
+bfg --strip-blobs-bigger-than 50M your-repo.git
+# Após usar o BFG, execute os seguintes comandos para limpar o histórico local
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+# 7. Envie as mudanças para o repositório remoto
+git push origin main
+# 8. Se o repositório remoto já contiver arquivos grandes e o erro persistir, faça o push forçado para atualizar o histórico
+# Atenção: O "push --force" sobrescreverá o histórico do repositório remoto, então use com cuidado
+git push --force origin main
