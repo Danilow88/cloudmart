@@ -835,3 +835,24 @@ git push origin main
 # 8. Se o repositório remoto já contiver arquivos grandes e o erro persistir, faça o push forçado para atualizar o histórico
 # Atenção: O "push --force" sobrescreverá o histórico do repositório remoto, então use com cuidado
 git push --force origin main
+<<<<<<< HEAD
+=======
+
+git commit -m "replaced image uri with CONTAINER_IMAGE"
+git push
+git add -A
+git commit -m "alternado para Main Products"
+git push
+kubectl
+clear
+kubectl
+git reset --soft HEAD~1
+git add -A
+git commit -m "replaced image uri with CONTAINER_IMAGE"
+git push
+git add -A
+git commit -m "replaced image uri with CONTAINER_IMAGE"
+git push
+git add -A
+git push
+>>>>>>> 1330a79 (Minha mensagem de commit)
