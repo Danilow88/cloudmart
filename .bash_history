@@ -856,3 +856,108 @@ git push
 git add -A
 git push
 >>>>>>> 1330a79 (Minha mensagem de commit)
+git add -A
+git commit -m "replaced image uri with CONTAINER_IMAGE"
+git push
+nano cloudmart-frontend.yaml
+cd frontend
+nano cloudmart-frontend.yaml
+cd
+cd challengeday2
+cd challengeday-2
+cd challenge
+cc
+cd
+cd challenge-day2
+challenge-day2
+cd
+cd challenge-day2/frontend
+nano cloudmart-frontend.yaml
+git add -A
+git commit -m "replaced image uri with CONTAINER_IMAGE"
+git push
+git pull
+git reset --soft HEAD~3
+git reset --soft HEAD~1
+git reset --soft HEAD~5
+git reset --soft HEAD~1
+
+nano cloudmart-frontend.yaml
+git -a
+cat cloudmart-frontent.yml
+cat cloudmart-frontent.yaml
+cat cloudmart-frontend.yaml
+clear
+git -a
+git ADD -a
+git add -A
+git commit -m "replaced image uri with CONTAINER_IMAGE"
+git push
+git status
+git reset --soft HEAD~4
+git reset --soft HEAD~2
+git reset --soft HEAD~1
+git pull origin main
+git checkout main
+git pull origin main
+git add .
+git commit -m "Minha mensagem de commit"
+git pull origin main
+
+git config pull.rebase fals
+git stash
+git pull origin main
+git stash pop
+git add .
+git commit -m "Resolvendo conflitos após stash"
+git push origin main
+git checkout -- .bash_history challenge-day2/frontend/cloudmart-frontend.yaml
+git pull origin main
+git pull --rebase)
+git pull --rebase
+git add/rm <conflicted_files>git rebase --continue
+git add/rm <conflicted_files>
+
+git rebase --continue
+git add challenge-day2/frontend/cloudmart-frontend.yaml
+cd
+git add challenge-day2/frontend/cloudmart-frontend.yaml
+git commit
+git add/rm cloudmart-frontend.yaml
+
+git add/rm
+git checkout main
+ git fetch origin
+git merge feature-branch
+git status
+.bash_history
+git add cloudmart-fronend.yaml
+git add chalange-day2/frontend/cloudmart-fronend.yaml
+git add .bash_history
+git rebase --continue
+git status
+git push origin main
+nano cloudmart-frontend.yaml
+cd ‎challenge-day2/frontend
+cd ‎challenge-day2/frontend/
+cd
+cd ‎challenge-day2/frontend/
+cd ‎challenge-day2/frontend
+cd ‎challenge-day2
+cd
+cd frontend
+nano cloudmart-frontend.yaml
+cd
+nano cd ‎challenge-day2/frontend/cloudmart-frontend.yaml
+cd ‎challenge-day2/frontend
+
+cd challenge-day2/backend/challenge-day2
+cd challenge-day2/backend
+cd challenge-day2
+cd backend
+cd
+cd fronted
+cd ../frontend
+cd /frontend
+cd frontend
+nano ‎challenge-day2/frontend/cloudmart-frontend.yaml
