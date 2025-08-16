@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - Sistema de Gestão de Estoque{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>
+            <i class="bi bi-file-earmark-text"></i> Relatórios e Consultas
+        </h2>
+        <p class="text-muted">Consultas padronizadas e relatórios do sistema</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart"></i> Relatórios Rápidos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <button class="list-group-item list-group-item-action" onclick="generateReport('estoque_posicao')">
+                        <i class="bi bi-boxes text-primary"></i>
+                        <strong>Posição de Estoque</strong>
+                        <small class="text-muted d-block">Estoque atual por local/prateleira</small>
+                    </button>
+                    
+                    <button class="list-group-item list-group-item-action" onclick="generateReport('end_of_life')">
+                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                        <strong>Itens End of Life</strong>
+                        <small class="text-muted d-block">Equipamentos próximos ao fim da vida útil</small>
+                    </button>
+                    
+                    <button class="list-group-item list-group-item-action" onclick="generateReport('movimentacoes_periodo')">
+                        <i class="bi bi-arrow-left-right text-info"></i>
+                        <strong>Movimentações por Período</strong>
+                        <small class="text-muted d-block">Entradas e saídas nos últimos 30 dias</small>
+                    </button>
+                    
+                    <button class="list-group-item list-group-item-action" onclick="generateReport('sem_identificacao')">
+                        <i class="bi bi-question-circle text-danger"></i>
+                        <strong>Itens sem Tag/Serial</strong>
+                        <small class="text-muted d-block">Itens que precisam de identificação</small>
+                    </button>
+                    
+                    <button class="list-group-item list-group-item-action" onclick="generateReport('vendas_spark')">
+                        <i class="bi bi-cart text-success"></i>
+                        <strong>Controle de Vendas</strong>
+                        <small class="text-muted d-block">Relatório de vendas Spark</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-funnel"></i> Consulta Personalizada
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="customReportForm">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Relatório</label>
+                        <select class="form-select" id="reportType">
+                            <option value="">Selecione...</option>
+                            <option value="inventory">Inventário</option>
+                            <option value="movements">Movimentações</option>
+                            <option value="location">Por Local</option>
+                            <option value="supplier">Por Fornecedor</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Origem</label>
+                        <select class="form-select" id="reportOrigin">
+                            <option value="">Todas as origens</option>
+                            <option value="Itens A&V Spark">Itens A&V Spark</option>
+                            <option value="Itens A&V HQ1">Itens A&V HQ1</option>
+                            <option value="Techstop itens HQ1">Techstop HQ1</option>
+                            <option value="HQ1 8th">HQ1 8th</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Data Início</label>
+                            <input type="date" class="form-control" id="startDate">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Data Fim</label>
+                            <input type="date" class="form-control" id="endDate">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Filtros Adicionais</label>
+                        <input type="text" class="form-control" id="additionalFilters" 
+                               placeholder="Ex: marca, modelo, responsável...">
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Gerar Relatório
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Results -->
+<div class="row" id="reportResults" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0" id="reportTitle">
+                    <i class="bi bi-file-earmark-text"></i> Resultado do Relatório
+                </h5>
+                <div class="btn-group">
+                    <button class="btn btn-outline-success btn-sm" onclick="exportReport('csv')">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> CSV
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="exportReport('print')">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearReport()">
+                        <i class="bi bi-x-circle"></i> Fechar
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="reportContent">
+                    <!-- Report content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mt-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-light">
+            <div class="card-body">
+                <i class="bi bi-boxes display-6 text-primary"></i>
+                <h4 class="mt-2" id="totalItemsCard">-</h4>
+                <small class="text-muted">Total de Itens</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-light">
+            <div class="card-body">
+                <i class="bi bi-arrow-down-circle display-6 text-success"></i>
+                <h4 class="mt-2" id="entriesCard">-</h4>
+                <small class="text-muted">Entradas (30d)</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-light">
+            <div class="card-body">
+                <i class="bi bi-arrow-up-circle display-6 text-danger"></i>
+                <h4 class="mt-2" id="exitsCard">-</h4>
+                <small class="text-muted">Saídas (30d)</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-light">
+            <div class="card-body">
+                <i class="bi bi-exclamation-triangle display-6 text-warning"></i>
+                <h4 class="mt-2" id="eolCard">-</h4>
+                <small class="text-muted">End of Life</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadSummaryData();
+    setupCustomReportForm();
+    setDefaultDates();
+});
+
+function setDefaultDates() {
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    
+    document.getElementById('endDate').value = today.toISOString().split('T')[0];
+    document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+}
+
+function loadSummaryData() {
+    // This would typically come from the backend
+    // For now, we'll use placeholder data
+    document.getElementById('totalItemsCard').textContent = '1,234';
+    document.getElementById('entriesCard').textContent = '45';
+    document.getElementById('exitsCard').textContent = '38';
+    document.getElementById('eolCard').textContent = '12';
+}
+
+function setupCustomReportForm() {
+    document.getElementById('customReportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const reportType = document.getElementById('reportType').value;
+        const origin = document.getElementById('reportOrigin').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const filters = document.getElementById('additionalFilters').value;
+        
+        if (!reportType) {
+            alert('Selecione um tipo de relatório');
+            return;
+        }
+        
+        generateCustomReport({
+            type: reportType,
+            origin: origin,
+            startDate: startDate,
+            endDate: endDate,
+            filters: filters
+        });
+    });
+}
+
+function generateReport(reportType) {
+    showLoading();
+    
+    // Simulate API call
+    setTimeout(() => {
+        let reportData = getReportData(reportType);
+        displayReport(reportData);
+        hideLoading();
+    }, 1000);
+}
+
+function generateCustomReport(params) {
+    showLoading();
+    
+    // Simulate API call with parameters
+    setTimeout(() => {
+        let reportData = getCustomReportData(params);
+        displayReport(reportData);
+        hideLoading();
+    }, 1000);
+}
+
+function getReportData(type) {
+    const reportData = {
+        'estoque_posicao': {
+            title: 'Posição de Estoque por Local',
+            headers: ['Local/Prateleira', 'Item', 'Modelo', 'Quantidade', 'Valor Total'],
+            data: [
+                ['Prateleira A1', 'Notebook Dell', 'Latitude 5520', '5', 'R$ 25.000,00'],
+                ['Prateleira A2', 'Monitor Samsung', '24" LED', '8', 'R$ 4.800,00'],
+                ['Prateleira B1', 'Mouse Logitech', 'MX Master 3', '15', 'R$ 2.250,00'],
+                ['AVENUE 1', 'Projetor Epson', 'PowerLite X41+', '2', 'R$ 3.600,00']
+            ]
+        },
+        'end_of_life': {
+            title: 'Itens Próximos ao End of Life',
+            headers: ['Item', 'Modelo', 'End of Life', 'Dias Restantes', 'Local'],
+            data: [
+                ['Notebook HP', 'EliteBook 840', '15/03/2024', '45', 'Prateleira C1'],
+                ['Desktop Dell', 'OptiPlex 7090', '28/02/2024', '29', 'Prateleira B2'],
+                ['Monitor LG', '22" IPS', '10/04/2024', '71', 'Prateleira A3']
+            ]
+        },
+        'movimentacoes_periodo': {
+            title: 'Movimentações dos Últimos 30 Dias',
+            headers: ['Data', 'Tipo', 'Item', 'Quantidade', 'Responsável'],
+            data: [
+                ['15/01/2024', 'Entrada', 'Notebook Dell', '3', 'João Silva'],
+                ['14/01/2024', 'Saída', 'Mouse Logitech', '2', 'Maria Santos'],
+                ['13/01/2024', 'Entrada', 'Monitor Samsung', '5', 'Pedro Costa'],
+                ['12/01/2024', 'Saída', 'Teclado Microsoft', '1', 'Ana Lima']
+            ]
+        },
+        'sem_identificacao': {
+            title: 'Itens sem Tag/Serial',
+            headers: ['Item', 'Modelo', 'Marca', 'Local', 'Ação Necessária'],
+            data: [
+                ['Teclado', 'K380', 'Logitech', 'Prateleira D1', 'Adicionar Tag'],
+                ['Webcam', 'C920', 'Logitech', 'Prateleira D2', 'Adicionar Serial'],
+                ['Mouse Pad', 'XXL', 'Corsair', 'Prateleira E1', 'Adicionar Tag']
+            ]
+        },
+        'vendas_spark': {
+            title: 'Controle de Vendas - Spark',
+            headers: ['Item', 'Quantidade', 'Estado', 'Status', 'Valor de Venda'],
+            data: [
+                ['Notebook Lenovo', '2', 'Usado', 'Vendido', 'R$ 3.200,00'],
+                ['Monitor Dell', '1', 'Bom', 'À venda', 'R$ 800,00'],
+                ['Desktop HP', '3', 'Regular', 'Vendido', 'R$ 2.100,00']
+            ]
+        }
+    };
+    
+    return reportData[type] || {
+        title: 'Relatório não encontrado',
+        headers: [],
+        data: []
+    };
+}
+
+function getCustomReportData(params) {
+    return {
+        title: `Relatório Personalizado - ${params.type}`,
+        headers: ['Coluna 1', 'Coluna 2', 'Coluna 3', 'Coluna 4'],
+        data: [
+            ['Dados filtrados', 'por critérios', 'personalizados', 'do usuário'],
+            ['Período:', `${params.startDate} a ${params.endDate}`, '', ''],
+            ['Origem:', params.origin || 'Todas', '', '']
+        ]
+    };
+}
+
+function displayReport(reportData) {
+    const reportResults = document.getElementById('reportResults');
+    const reportTitle = document.getElementById('reportTitle');
+    const reportContent = document.getElementById('reportContent');
+    
+    reportTitle.innerHTML = `<i class="bi bi-file-earmark-text"></i> ${reportData.title}`;
+    
+    let tableHTML = '<div class="table-responsive"><table class="table table-striped table-hover">';
+    
+    // Headers
+    if (reportData.headers.length > 0) {
+        tableHTML += '<thead class="table-dark"><tr>';
+        reportData.headers.forEach(header => {
+            tableHTML += `<th>${header}</th>`;
+        });
+        tableHTML += '</tr></thead>';
+    }
+    
+    // Data
+    tableHTML += '<tbody>';
+    reportData.data.forEach(row => {
+        tableHTML += '<tr>';
+        row.forEach(cell => {
+            tableHTML += `<td>${cell}</td>`;
+        });
+        tableHTML += '</tr>';
+    });
+    tableHTML += '</tbody></table></div>';
+    
+    // Summary
+    tableHTML += `<div class="mt-3"><strong>Total de registros:</strong> ${reportData.data.length}</div>`;
+    
+    reportContent.innerHTML = tableHTML;
+    reportResults.style.display = 'block';
+    
+    // Scroll to results
+    reportResults.scrollIntoView({ behavior: 'smooth' });
+}
+
+function exportReport(format) {
+    if (format === 'csv') {
+        exportToCSV();
+    } else if (format === 'print') {
+        window.print();
+    }
+}
+
+function exportToCSV() {
+    const table = document.querySelector('#reportContent table');
+    if (!table) {
+        alert('Nenhum relatório para exportar');
+        return;
+    }
+    
+    let csv = '';
+    const rows = table.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('th, td');
+        const rowData = Array.from(cells).map(cell => `"${cell.textContent.trim()}"`);
+        csv += rowData.join(',') + '\n';
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `relatorio_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function clearReport() {
+    document.getElementById('reportResults').style.display = 'none';
+}
+
+function showLoading() {
+    const reportContent = document.getElementById('reportContent');
+    reportContent.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2 text-muted">Gerando relatório...</p>
+        </div>
+    `;
+    document.getElementById('reportResults').style.display = 'block';
+}
+
+function hideLoading() {
+    // Loading will be replaced by actual content
+}
+</script>
+
+<style>
+@media print {
+    .navbar, .card-header .btn-group, .btn {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+</style>
+{% endblock %}

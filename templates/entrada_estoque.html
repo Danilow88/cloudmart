@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+
+{% block title %}Entrada de Estoque - Sistema de Gestão de Estoque{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>
+            <i class="bi bi-arrow-down-circle text-success"></i> Entrada de Estoque
+        </h2>
+        <p class="text-muted">Registrar entrada de itens via código de barras</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-plus-circle"></i> Registrar Entrada
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="entryForm">
+                    <!-- Barcode Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <label for="barcode" class="form-label">
+                                <i class="bi bi-upc-scan"></i> Código de Barras
+                            </label>
+                            <div class="input-group">
+                                <input type="text" id="barcode" name="barcode" class="form-control form-control-lg" 
+                                       placeholder="Escaneie ou digite o código de barras" autofocus>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#barcodeModal">
+                                    <i class="bi bi-camera"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Use um leitor de código de barras ou a câmera do dispositivo</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="origem_pagina" class="form-label">
+                                <i class="bi bi-collection"></i> Origem
+                            </label>
+                            <select id="origem_pagina" name="origem_pagina" class="form-select" required>
+                                <option value="">Selecione a origem</option>
+                                <option value="Itens A&V Spark">Itens A&V Spark</option>
+                                <option value="Itens A&V HQ1">Itens A&V HQ1</option>
+                                <option value="Techstop itens HQ1">Techstop itens HQ1</option>
+                                <option value="HQ1 8th">HQ1 8th</option>
+                                <option value="TVs e Monitores (Spark)">TVs e Monitores (Spark)</option>
+                                <option value="Lixo-Eletrônico HQ-1">Lixo-Eletrônico HQ-1</option>
+                                <option value="Inventário HQ1 (oficial em progresso)">Inventário HQ1 (oficial em progresso)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Item Information -->
+                    <div id="itemInfo" class="mb-4" style="display: none;">
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-info-circle"></i> Item Encontrado
+                            </h6>
+                            <div id="itemDetails"></div>
+                        </div>
+                    </div>
+
+                    <!-- Entry Details -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="itens" class="form-label">
+                                <i class="bi bi-box"></i> Item
+                            </label>
+                            <input type="text" id="itens" name="itens" class="form-control" placeholder="Nome do item">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="modelo" class="form-label">
+                                <i class="bi bi-gear"></i> Modelo
+                            </label>
+                            <input type="text" id="modelo" name="modelo" class="form-control" placeholder="Modelo do item">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="quantidade" class="form-label">
+                                <i class="bi bi-123"></i> Quantidade
+                            </label>
+                            <input type="number" id="quantidade" name="quantidade" class="form-control" value="1" min="1" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="local" class="form-label">
+                                <i class="bi bi-geo-alt"></i> Local/Prateleira
+                            </label>
+                            <input type="text" id="local" name="local" class="form-control" placeholder="Local de armazenamento">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="responsavel" class="form-label">
+                                <i class="bi bi-person"></i> Responsável
+                            </label>
+                            <input type="text" id="responsavel" name="responsavel" class="form-control" 
+                                   value="{{ current_user }}" placeholder="Nome do responsável">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="observacao" class="form-label">
+                            <i class="bi bi-chat-text"></i> Observação
+                        </label>
+                        <textarea id="observacao" name="observacao" class="form-control" rows="3" 
+                                  placeholder="Observações sobre a entrada"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            <i class="bi bi-x-circle"></i> Limpar
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Registrar Entrada
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Instructions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightbulb"></i> Como usar
+                </h6>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li>Selecione a <strong>origem</strong> do item</li>
+                    <li>Escaneie ou digite o <strong>código de barras</strong></li>
+                    <li>Se o item for encontrado, as informações aparecerão automaticamente</li>
+                    <li>Ajuste a <strong>quantidade</strong> se necessário</li>
+                    <li>Preencha informações adicionais</li>
+                    <li>Clique em <strong>Registrar Entrada</strong></li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Recent Entries -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Entradas Recentes
+                </h6>
+            </div>
+            <div class="card-body" id="recentEntries">
+                <p class="text-muted">Carregando...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let foundItem = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentEntries();
+    setupBarcodeListener();
+    setupFormSubmit();
+});
+
+function setupBarcodeListener() {
+    const barcodeInput = document.getElementById('barcode');
+    const origemSelect = document.getElementById('origem_pagina');
+    
+    barcodeInput.addEventListener('input', function() {
+        const barcode = this.value.trim();
+        const origem = origemSelect.value;
+        
+        if (barcode.length >= 3 && origem) {
+            searchItemByBarcode(barcode, origem);
+        } else {
+            hideItemInfo();
+        }
+    });
+    
+    origemSelect.addEventListener('change', function() {
+        const barcode = barcodeInput.value.trim();
+        if (barcode && this.value) {
+            searchItemByBarcode(barcode, this.value);
+        }
+    });
+}
+
+function searchItemByBarcode(barcode, origem) {
+    fetch(`/api/search-item?barcode=${encodeURIComponent(barcode)}&origem=${encodeURIComponent(origem)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.items && data.items.length > 0) {
+                foundItem = data.items[0];
+                showItemInfo(foundItem);
+                fillFormWithItem(foundItem);
+            } else {
+                hideItemInfo();
+                foundItem = null;
+            }
+        })
+        .catch(error => {
+            console.error('Error searching item:', error);
+            hideItemInfo();
+            foundItem = null;
+        });
+}
+
+function showItemInfo(item) {
+    const itemInfo = document.getElementById('itemInfo');
+    const itemDetails = document.getElementById('itemDetails');
+    
+    itemDetails.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Item:</strong> ${item.itens || '-'}<br>
+                <strong>Modelo:</strong> ${item.modelo || '-'}<br>
+                <strong>Marca:</strong> ${item.marca || '-'}
+            </div>
+            <div class="col-md-6">
+                <strong>Tag:</strong> ${item.tag || '-'}<br>
+                <strong>Serial:</strong> ${item.serial || '-'}<br>
+                <strong>Qtd Atual:</strong> <span class="badge bg-primary">${item.qtd || 0}</span>
+            </div>
+        </div>
+    `;
+    
+    itemInfo.style.display = 'block';
+}
+
+function hideItemInfo() {
+    document.getElementById('itemInfo').style.display = 'none';
+}
+
+function fillFormWithItem(item) {
+    document.getElementById('itens').value = item.itens || '';
+    document.getElementById('modelo').value = item.modelo || '';
+}
+
+function setupFormSubmit() {
+    document.getElementById('entryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        fetch('/entrada-estoque', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                showSuccess(result.message);
+                clearForm();
+                loadRecentEntries();
+            } else {
+                showError(result.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Erro ao registrar entrada');
+        });
+    });
+}
+
+function clearForm() {
+    document.getElementById('entryForm').reset();
+    document.getElementById('responsavel').value = '{{ current_user }}';
+    document.getElementById('quantidade').value = 1;
+    hideItemInfo();
+    foundItem = null;
+    document.getElementById('barcode').focus();
+}
+
+function showSuccess(message) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-success alert-dismissible fade show';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('main').insertBefore(alert, document.querySelector('main').firstChild);
+    
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+function showError(message) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-danger alert-dismissible fade show';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('main').insertBefore(alert, document.querySelector('main').firstChild);
+    
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+function loadRecentEntries() {
+    // This would typically load from an API endpoint
+    const recentContainer = document.getElementById('recentEntries');
+    recentContainer.innerHTML = '<p class="text-muted">Nenhuma entrada recente</p>';
+}
+
+// Barcode modal integration
+window.addEventListener('barcodeScanned', function(e) {
+    document.getElementById('barcode').value = e.detail.barcode;
+    document.getElementById('barcode').dispatchEvent(new Event('input'));
+});
+</script>
+{% endblock %}

@@ -1,0 +1,329 @@
+/* Custom styles for SPARK & HQ1 Inventory System */
+
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --dark-color: #212529;
+    --light-color: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Tables */
+.table {
+    margin-bottom: 0;
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.025rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.075);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.125rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Dashboard Cards */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-danger,
+.card.bg-warning,
+.card.bg-info {
+    border: none;
+    color: white;
+}
+
+.card.bg-primary .card-body,
+.card.bg-success .card-body,
+.card.bg-danger .card-body,
+.card.bg-warning .card-body,
+.card.bg-info .card-body {
+    padding: 1.5rem;
+}
+
+.card.bg-warning {
+    color: #212529 !important;
+}
+
+/* Forms */
+.form-control {
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select {
+    border-radius: 6px;
+}
+
+/* Badges */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+/* Barcode Scanner */
+#camera-container {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+#camera {
+    width: 100%;
+    height: auto;
+    max-height: 250px;
+    object-fit: cover;
+}
+
+.barcode-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #ff0000 50%, transparent 100%);
+    animation: scan 2s infinite;
+}
+
+@keyframes scan {
+    0% { transform: translate(-50%, -150%); }
+    50% { transform: translate(-50%, -50%); }
+    100% { transform: translate(-50%, 50%); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .navbar-nav .dropdown-menu {
+        position: static;
+        float: none;
+        box-shadow: none;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table th:nth-child(n+6),
+    .table td:nth-child(n+6) {
+        display: none;
+    }
+    
+    .table th:nth-child(1),
+    .table td:nth-child(1),
+    .table th:nth-child(2),
+    .table td:nth-child(2),
+    .table th:nth-child(3),
+    .table td:nth-child(3),
+    .table th:last-child,
+    .table td:last-child {
+        display: table-cell;
+    }
+}
+
+@media (max-width: 576px) {
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        display: none;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .container-fluid {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    .btn-group .btn {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Custom scrollbar */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Alert improvements */
+.alert {
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #d1edff;
+    color: #0c5460;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-info {
+    background-color: #cce7ff;
+    color: #055160;
+}
+
+/* List groups */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0 !important;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.list-group-item-action:hover {
+    background-color: rgba(13, 110, 253, 0.075);
+}
+
+/* Utilities */
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #e9ecef;
+    }
+    
+    .card {
+        background-color: #2d2d2d;
+        color: #e9ecef;
+    }
+    
+    .table {
+        color: #e9ecef;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.075);
+    }
+    
+    .form-control {
+        background-color: #2d2d2d;
+        border-color: #495057;
+        color: #e9ecef;
+    }
+    
+    .form-control:focus {
+        background-color: #2d2d2d;
+        border-color: #86b7fe;
+        color: #e9ecef;
+    }
+}
