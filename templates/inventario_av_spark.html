@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+
+{% block title %}Itens A&V Spark - Sistema de Gestão de Estoque{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>
+            <i class="bi bi-box"></i> Itens A&V Spark
+        </h2>
+        <p class="text-muted">Inventário de equipamentos audiovisuais da unidade Spark</p>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#entryModal">
+                <i class="bi bi-plus-circle"></i> Nova Entrada
+            </button>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exitModal">
+                <i class="bi bi-dash-circle"></i> Registrar Saída
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#barcodeModal">
+                <i class="bi bi-upc-scan"></i> Scanner
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-3">
+    <div class="col-md-3">
+        <input type="text" id="searchFilter" class="form-control" placeholder="Buscar itens...">
+    </div>
+    <div class="col-md-2">
+        <select id="marcaFilter" class="form-select">
+            <option value="">Todas as Marcas</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select id="usoFilter" class="form-select">
+            <option value="">Todos os Usos</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select id="ownerFilter" class="form-select">
+            <option value="">Todos os Owners</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+            <i class="bi bi-x-circle"></i> Limpar Filtros
+        </button>
+    </div>
+</div>
+
+<!-- Items Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-table"></i> Lista de Itens
+        </h5>
+        <span class="badge bg-primary" id="totalItems">{{ items|length }} itens</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="itemsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>ITENS</th>
+                        <th>MODELO</th>
+                        <th>Tag</th>
+                        <th>Serial</th>
+                        <th>Marca</th>
+                        <th>Valor</th>
+                        <th>Data Compra</th>
+                        <th>Fornecedor</th>
+                        <th>PO</th>
+                        <th>USO</th>
+                        <th>QTD</th>
+                        <th>AVENUE</th>
+                        <th>STREET</th>
+                        <th>OWNER</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.itens or '-' }}</td>
+                        <td>{{ item.modelo or '-' }}</td>
+                        <td>
+                            {% if item.tag %}
+                                <span class="badge bg-info">{{ item.tag }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.serial %}
+                                <span class="badge bg-secondary">{{ item.serial }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ item.marca or '-' }}</td>
+                        <td>
+                            {% if item.valor %}
+                                R$ {{ "%.2f"|format(item.valor) }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.data_compra %}
+                                {{ item.data_compra.strftime('%d/%m/%Y') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ item.fornecedor or '-' }}</td>
+                        <td>{{ item.po or '-' }}</td>
+                        <td>{{ item.uso or '-' }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ item.qtd or 0 }}</span>
+                        </td>
+                        <td>{{ item.avenue or '-' }}</td>
+                        <td>{{ item.street or '-' }}</td>
+                        <td>{{ item.owner or '-' }}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary" title="Ver Movimentações"
+                                        onclick="viewMovements({{ item.id }})">
+                                    <i class="bi bi-clock-history"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-success" title="Entrada"
+                                        onclick="quickEntry({{ item.id }})">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" title="Saída"
+                                        onclick="quickExit({{ item.id }})">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Entry Modal -->
+<div class="modal fade" id="quickEntryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle text-success"></i> Entrada Rápida
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickEntryForm">
+                    <input type="hidden" id="entryItemId">
+                    <div class="mb-3">
+                        <label class="form-label">Item</label>
+                        <input type="text" id="entryItemName" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantidade</label>
+                        <input type="number" id="entryQuantity" class="form-control" value="1" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observação</label>
+                        <textarea id="entryObservation" class="form-control" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="processEntry()">Registrar Entrada</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Exit Modal -->
+<div class="modal fade" id="quickExitModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-dash-circle text-danger"></i> Saída Rápida
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickExitForm">
+                    <input type="hidden" id="exitItemId">
+                    <div class="mb-3">
+                        <label class="form-label">Item</label>
+                        <input type="text" id="exitItemName" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantidade Disponível</label>
+                        <input type="text" id="exitAvailable" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantidade a Sair</label>
+                        <input type="number" id="exitQuantity" class="form-control" value="1" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Destino/Owner</label>
+                        <input type="text" id="exitDestination" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observação</label>
+                        <textarea id="exitObservation" class="form-control" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="processExit()">Registrar Saída</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentItems = {{ items|tojson }};
+
+// Initialize filters
+document.addEventListener('DOMContentLoaded', function() {
+    populateFilters();
+    setupTableFilters();
+});
+
+function populateFilters() {
+    const marcas = [...new Set(currentItems.map(item => item.marca).filter(Boolean))];
+    const usos = [...new Set(currentItems.map(item => item.uso).filter(Boolean))];
+    const owners = [...new Set(currentItems.map(item => item.owner).filter(Boolean))];
+    
+    populateSelect('marcaFilter', marcas);
+    populateSelect('usoFilter', usos);
+    populateSelect('ownerFilter', owners);
+}
+
+function populateSelect(selectId, options) {
+    const select = document.getElementById(selectId);
+    options.sort().forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        select.appendChild(optionElement);
+    });
+}
+
+function setupTableFilters() {
+    const searchFilter = document.getElementById('searchFilter');
+    const marcaFilter = document.getElementById('marcaFilter');
+    const usoFilter = document.getElementById('usoFilter');
+    const ownerFilter = document.getElementById('ownerFilter');
+    
+    [searchFilter, marcaFilter, usoFilter, ownerFilter].forEach(filter => {
+        filter.addEventListener('input', filterTable);
+    });
+}
+
+function filterTable() {
+    const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+    const marcaFilter = document.getElementById('marcaFilter').value;
+    const usoFilter = document.getElementById('usoFilter').value;
+    const ownerFilter = document.getElementById('ownerFilter').value;
+    
+    const rows = document.querySelectorAll('#itemsTable tbody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const cells = row.cells;
+        const item = cells[1].textContent.toLowerCase();
+        const modelo = cells[2].textContent.toLowerCase();
+        const marca = cells[5].textContent;
+        const uso = cells[10].textContent;
+        const owner = cells[14].textContent;
+        
+        const matchesSearch = !searchTerm || item.includes(searchTerm) || modelo.includes(searchTerm);
+        const matchesMarca = !marcaFilter || marca === marcaFilter;
+        const matchesUso = !usoFilter || uso === usoFilter;
+        const matchesOwner = !ownerFilter || owner === ownerFilter;
+        
+        if (matchesSearch && matchesMarca && matchesUso && matchesOwner) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('totalItems').textContent = `${visibleCount} itens`;
+}
+
+function clearFilters() {
+    document.getElementById('searchFilter').value = '';
+    document.getElementById('marcaFilter').value = '';
+    document.getElementById('usoFilter').value = '';
+    document.getElementById('ownerFilter').value = '';
+    filterTable();
+}
+
+function quickEntry(itemId) {
+    const item = currentItems.find(i => i.id === itemId);
+    if (item) {
+        document.getElementById('entryItemId').value = itemId;
+        document.getElementById('entryItemName').value = `${item.itens} - ${item.modelo}`;
+        document.getElementById('entryQuantity').value = 1;
+        document.getElementById('entryObservation').value = '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('quickEntryModal'));
+        modal.show();
+    }
+}
+
+function quickExit(itemId) {
+    const item = currentItems.find(i => i.id === itemId);
+    if (item) {
+        document.getElementById('exitItemId').value = itemId;
+        document.getElementById('exitItemName').value = `${item.itens} - ${item.modelo}`;
+        document.getElementById('exitAvailable').value = item.qtd || 0;
+        document.getElementById('exitQuantity').value = 1;
+        document.getElementById('exitQuantity').max = item.qtd || 0;
+        document.getElementById('exitDestination').value = '';
+        document.getElementById('exitObservation').value = '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('quickExitModal'));
+        modal.show();
+    }
+}
+
+function processEntry() {
+    const formData = {
+        item_id: document.getElementById('entryItemId').value,
+        quantidade: document.getElementById('entryQuantity').value,
+        observacao: document.getElementById('entryObservation').value,
+        origem_pagina: 'Itens A&V Spark'
+    };
+    
+    fetch('/entrada-estoque', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erro ao processar entrada');
+    });
+}
+
+function processExit() {
+    const formData = {
+        item_id: document.getElementById('exitItemId').value,
+        quantidade: document.getElementById('exitQuantity').value,
+        destino: document.getElementById('exitDestination').value,
+        observacao: document.getElementById('exitObservation').value,
+        origem_pagina: 'Itens A&V Spark'
+    };
+    
+    fetch('/saida-estoque', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erro ao processar saída');
+    });
+}
+
+function viewMovements(itemId) {
+    window.open(`/movimentacoes?item_id=${itemId}`, '_blank');
+}
+</script>
+{% endblock %}

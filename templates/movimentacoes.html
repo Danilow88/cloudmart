@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Movimentações - Sistema de Gestão de Estoque{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>
+            <i class="bi bi-list-ul"></i> Histórico de Movimentações
+        </h2>
+        <p class="text-muted">Registro completo de entradas e saídas do estoque</p>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-success" onclick="exportCSV()">
+            <i class="bi bi-download"></i> Exportar CSV
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h6 class="mb-0">
+            <i class="bi bi-funnel"></i> Filtros
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2">
+                <label class="form-label">Tipo</label>
+                <select id="tipoFilter" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="Entrada">Entrada</option>
+                    <option value="Saída">Saída</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Origem</label>
+                <select id="origemFilter" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="Itens A&V Spark">Itens A&V Spark</option>
+                    <option value="Itens A&V HQ1">Itens A&V HQ1</option>
+                    <option value="Techstop itens HQ1">Techstop itens HQ1</option>
+                    <option value="HQ1 8th">HQ1 8th</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Data Início</label>
+                <input type="date" id="dataInicioFilter" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Data Fim</label>
+                <input type="date" id="dataFimFilter" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Buscar</label>
+                <input type="text" id="searchFilter" class="form-control" placeholder="Item, responsável, tag...">
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-outline-secondary d-block" onclick="clearFilters()">
+                    <i class="bi bi-x-circle"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Movimentações Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-table"></i> Movimentações
+        </h5>
+        <span class="badge bg-primary" id="totalMovimentos">
+            {% if movimentacoes.items %}{{ movimentacoes.total }} movimentações{% else %}0 movimentações{% endif %}
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="movimentacoesTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Tipo</th>
+                        <th>Origem</th>
+                        <th>Item</th>
+                        <th>Tag/Serial</th>
+                        <th>Quantidade</th>
+                        <th>Responsável</th>
+                        <th>Local</th>
+                        <th>Observação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if movimentacoes.items %}
+                        {% for mov in movimentacoes.items %}
+                        <tr>
+                            <td>
+                                <small class="text-muted">
+                                    {{ mov.data_hora.strftime('%d/%m/%Y') }}<br>
+                                    {{ mov.data_hora.strftime('%H:%M:%S') }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if mov.tipo == 'Entrada' %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-arrow-down-circle"></i> Entrada
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-arrow-up-circle"></i> Saída
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ mov.origem_pagina or '-' }}</small>
+                            </td>
+                            <td>{{ mov.itens or '-' }}</td>
+                            <td>
+                                {% if mov.tag %}
+                                    <span class="badge bg-info">{{ mov.tag }}</span>
+                                {% endif %}
+                                {% if mov.serial %}
+                                    <span class="badge bg-secondary">{{ mov.serial }}</span>
+                                {% endif %}
+                                {% if not mov.tag and not mov.serial %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if mov.quantidade > 0 %}
+                                    <span class="text-success">+{{ mov.quantidade }}</span>
+                                {% else %}
+                                    <span class="text-danger">{{ mov.quantidade }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ mov.responsavel or '-' }}</td>
+                            <td>{{ mov.local or '-' }}</td>
+                            <td>
+                                {% if mov.observacao %}
+                                    <small class="text-muted">{{ mov.observacao[:50] }}{% if mov.observacao|length > 50 %}...{% endif %}</small>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                                Nenhuma movimentação encontrada
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if movimentacoes.pages > 1 %}
+    <div class="card-footer">
+        <nav aria-label="Navegação da página">
+            <ul class="pagination justify-content-center mb-0">
+                {% if movimentacoes.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('movimentacoes', page=movimentacoes.prev_num) }}">
+                            <i class="bi bi-chevron-left"></i> Anterior
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in movimentacoes.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != movimentacoes.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('movimentacoes', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if movimentacoes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('movimentacoes', page=movimentacoes.next_num) }}">
+                            Próxima <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        <div class="text-center mt-2">
+            <small class="text-muted">
+                Página {{ movimentacoes.page }} de {{ movimentacoes.pages }} 
+                ({{ movimentacoes.total }} movimentações no total)
+            </small>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setupFilters();
+    setDefaultDates();
+});
+
+function setupFilters() {
+    const filters = ['tipoFilter', 'origemFilter', 'dataInicioFilter', 'dataFimFilter', 'searchFilter'];
+    
+    filters.forEach(filterId => {
+        const element = document.getElementById(filterId);
+        if (element) {
+            element.addEventListener('change', applyFilters);
+            if (element.type === 'text') {
+                element.addEventListener('input', InventorySystem.debounce(applyFilters, 500));
+            }
+        }
+    });
+}
+
+function setDefaultDates() {
+    const dataFimFilter = document.getElementById('dataFimFilter');
+    const dataInicioFilter = document.getElementById('dataInicioFilter');
+    
+    if (dataFimFilter && !dataFimFilter.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dataFimFilter.value = today;
+    }
+    
+    if (dataInicioFilter && !dataInicioFilter.value) {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        dataInicioFilter.value = thirtyDaysAgo.toISOString().split('T')[0];
+    }
+}
+
+function applyFilters() {
+    const tipo = document.getElementById('tipoFilter').value;
+    const origem = document.getElementById('origemFilter').value;
+    const dataInicio = document.getElementById('dataInicioFilter').value;
+    const dataFim = document.getElementById('dataFimFilter').value;
+    const search = document.getElementById('searchFilter').value.toLowerCase();
+    
+    const rows = document.querySelectorAll('#movimentacoesTable tbody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        if (row.cells.length === 1) return; // Skip "no data" row
+        
+        const movTipo = row.cells[1].textContent.includes('Entrada') ? 'Entrada' : 'Saída';
+        const movOrigem = row.cells[2].textContent.trim();
+        const movItem = row.cells[3].textContent.toLowerCase();
+        const movResponsavel = row.cells[6].textContent.toLowerCase();
+        const movTag = row.cells[4].textContent.toLowerCase();
+        const movObservacao = row.cells[8].textContent.toLowerCase();
+        
+        // Date filtering would require more complex logic
+        const matchesTipo = !tipo || movTipo === tipo;
+        const matchesOrigem = !origem || movOrigem === origem;
+        const matchesSearch = !search || 
+            movItem.includes(search) || 
+            movResponsavel.includes(search) || 
+            movTag.includes(search) ||
+            movObservacao.includes(search);
+        
+        if (matchesTipo && matchesOrigem && matchesSearch) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('totalMovimentos').textContent = `${visibleCount} movimentações`;
+}
+
+function clearFilters() {
+    document.getElementById('tipoFilter').value = '';
+    document.getElementById('origemFilter').value = '';
+    document.getElementById('dataInicioFilter').value = '';
+    document.getElementById('dataFimFilter').value = '';
+    document.getElementById('searchFilter').value = '';
+    
+    setDefaultDates();
+    applyFilters();
+}
+
+function exportCSV() {
+    const table = document.getElementById('movimentacoesTable');
+    const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => 
+        row.style.display !== 'none' && row.cells.length > 1
+    );
+    
+    if (rows.length === 0) {
+        alert('Nenhuma movimentação para exportar');
+        return;
+    }
+    
+    let csv = 'Data/Hora,Tipo,Origem,Item,Tag/Serial,Quantidade,Responsável,Local,Observação\n';
+    
+    rows.forEach(row => {
+        const cells = Array.from(row.cells).map(cell => {
+            return '"' + cell.textContent.replace(/"/g, '""').trim() + '"';
+        });
+        csv += cells.join(',') + '\n';
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `movimentacoes_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+{% endblock %}

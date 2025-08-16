@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistema de Gestão de Estoque{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </h2>
+        <p class="text-muted">Visão geral do inventário SPARK e HQ1</p>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-primary text-white">
+            <div class="card-body">
+                <i class="bi bi-boxes display-4 mb-2"></i>
+                <h3 class="mb-0">{{ stats.total_items }}</h3>
+                <small>Itens Totais</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-success text-white">
+            <div class="card-body">
+                <i class="bi bi-arrow-down-circle display-4 mb-2"></i>
+                <h3 class="mb-0">{{ stats.entries_30d }}</h3>
+                <small>Entradas (30 dias)</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-danger text-white">
+            <div class="card-body">
+                <i class="bi bi-arrow-up-circle display-4 mb-2"></i>
+                <h3 class="mb-0">{{ stats.exits_30d }}</h3>
+                <small>Saídas (30 dias)</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-warning text-white">
+            <div class="card-body">
+                <i class="bi bi-exclamation-triangle display-4 mb-2"></i>
+                <h3 class="mb-0">{{ stats.items_eol }}</h3>
+                <small>End of Life Próximo</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning"></i> Ações Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('entrada_estoque') }}" class="btn btn-success btn-lg w-100">
+                            <i class="bi bi-arrow-down-circle"></i><br>
+                            <span class="small">Entrada de Estoque</span><br>
+                            <small class="text-light">Código de Barras</small>
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('saida_estoque') }}" class="btn btn-danger btn-lg w-100">
+                            <i class="bi bi-arrow-up-circle"></i><br>
+                            <span class="small">Saída de Estoque</span><br>
+                            <small class="text-light">Código de Barras</small>
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('movimentacoes') }}" class="btn btn-info btn-block w-100">
+                            <i class="bi bi-list-ul"></i> Movimentações
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('relatorios') }}" class="btn btn-warning btn-block w-100">
+                            <i class="bi bi-file-earmark-text"></i> Relatórios
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <button class="btn btn-secondary btn-block w-100" data-bs-toggle="modal" data-bs-target="#barcodeModal">
+                            <i class="bi bi-upc-scan"></i> Scanner Rápido
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inventory Areas -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-building"></i> Inventários SPARK
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('inventario_av_spark') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-box"></i> Itens A&V Spark
+                        <i class="bi bi-chevron-right float-end"></i>
+                    </a>
+                    <a href="{{ url_for('inventario_tvs_monitores') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-tv"></i> TVs e Monitores
+                        <i class="bi bi-chevron-right float-end"></i>
+                    </a>
+                    <a href="{{ url_for('vendas_spark') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-cart"></i> Vendas Spark
+                        <i class="bi bi-chevron-right float-end"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-building-fill"></i> Inventários HQ1
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('inventario_av_hq1') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-box"></i> Itens A&V HQ1
+                        <i class="bi bi-chevron-right float-end"></i>
+                    </a>
+                    <a href="{{ url_for('inventario_techstop_hq1') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-gear"></i> Techstop HQ1
+                        <i class="bi bi-chevron-right float-end"></i>
+                    </a>
+                    <a href="{{ url_for('inventario_hq1_8th') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-layers"></i> HQ1 8th
+                        <i class="bi bi-chevron-right float-end"></i>
+                    </a>
+                    <a href="{{ url_for('inventario_oficial') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-check-circle"></i> Inventário Oficial
+                        <i class="bi bi-chevron-right float-end"></i>
+                    </a>
+                    <a href="{{ url_for('lixo_eletronico') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-recycle"></i> Lixo Eletrônico
+                        <i class="bi bi-chevron-right float-end"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
