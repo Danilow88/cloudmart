@@ -348,7 +348,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script>
         // Utilidades
-        const currencyBRL = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+        const currencyBRL = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number.isFinite(value) ? value : 0);
+        const toNumberBR = (v) => {
+            if (v == null) return 0;
+            if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
+            if (typeof v !== 'string') return 0;
+            // Remove moeda, espaços e separadores de milhar, troca vírgula decimal por ponto
+            const cleaned = v.replace(/[^0-9,.-]/g, '')
+                             .replace(/\.(?=\d{3}(\D|$))/g, '')
+                             .replace(',', '.');
+            const num = parseFloat(cleaned);
+            return Number.isFinite(num) ? num : 0;
+        };
+        const normalizeArrayNumbers = (arr) => Array.isArray(arr) ? arr.map(toNumberBR) : [];
+        const normalizeChartData = (data) => {
+            if (!data) return data;
+            const out = { ...data };
+            if (data.monthly) out.monthly = { labels: data.monthly.labels || [], values: normalizeArrayNumbers(data.monthly.values) };
+            if (data.quarterly) out.quarterly = { labels: data.quarterly.labels || [], values: normalizeArrayNumbers(data.quarterly.values) };
+            if (data.yearly) out.yearly = { labels: data.yearly.labels || [], values: normalizeArrayNumbers(data.yearly.values) };
+            if (data.byItemType) out.byItemType = { labels: data.byItemType.labels || [], values: normalizeArrayNumbers(data.byItemType.values) };
+            if (data.byBuilding) out.byBuilding = { labels: data.byBuilding.labels || [], values: normalizeArrayNumbers(data.byBuilding.values) };
+            return out;
+        };
+        const safeSum = (arr) => (Array.isArray(arr) ? arr : []).reduce((sum, v) => sum + (Number.isFinite(v) ? v : toNumberBR(v)), 0);
     </script>
 </head>
 <body>
@@ -1105,19 +1128,19 @@
             if (realChartData) return Promise.resolve(filterDataByPeriod(realChartData, period));
             const loading = document.getElementById('chartLoading'); if (loading) loading.style.display = 'flex';
             if (typeof google === 'undefined' || !google.script || !google.script.run) {
-                const fallbackData = createFallbackData(); realChartData = fallbackData; if (loading) loading.style.display = 'none';
+                const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; if (loading) loading.style.display = 'none';
                 return Promise.resolve(filterDataByPeriod(fallbackData, period));
             }
             return new Promise((resolve) => {
                 let settled = false;
                 const finalize = (dataObj) => { if (settled) return; settled = true; if (loading) loading.style.display = 'none'; resolve(filterDataByPeriod(dataObj, period)); };
-                const timeoutId = setTimeout(() => { const fallbackData = createFallbackData(); realChartData = fallbackData; finalize(fallbackData); }, 8000);
+                const timeoutId = setTimeout(() => { const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; finalize(fallbackData); }, 8000);
                 try {
                     google.script.run
-                        .withSuccessHandler((data) => { clearTimeout(timeoutId); if (data && data.success && data.data) { realChartData = data.data; finalize(realChartData); } else { const fallbackData = createFallbackData(); realChartData = fallbackData; finalize(fallbackData); } })
-                        .withFailureHandler(() => { clearTimeout(timeoutId); const fallbackData = createFallbackData(); realChartData = fallbackData; finalize(fallbackData); })
+                        .withSuccessHandler((data) => { clearTimeout(timeoutId); if (data && data.success && data.data) { realChartData = normalizeChartData(data.data); finalize(realChartData); } else { const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; finalize(fallbackData); } })
+                        .withFailureHandler(() => { clearTimeout(timeoutId); const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; finalize(fallbackData); })
                         .getLossDataFromTotalCost();
-                } catch (err) { clearTimeout(timeoutId); const fallbackData = createFallbackData(); realChartData = fallbackData; finalize(fallbackData); }
+                } catch (err) { clearTimeout(timeoutId); const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; finalize(fallbackData); }
             });
         }
 
@@ -1136,12 +1159,15 @@
             try {
                 const realData = await extractRealDataFromSheet(currentChartPeriod);
                 if (itemLossChart) itemLossChart.destroy(); if (buildingLossChart) buildingLossChart.destroy(); if (monthlyLossChart) monthlyLossChart.destroy(); if (reposicaoChart) reposicaoChart.destroy();
-                const currencyTooltip = (context) => currencyBRL(context.parsed);
+                const currencyTooltip = (context) => {
+                    const val = typeof context.parsed === 'object' && context.parsed !== null ? context.parsed.y : context.parsed;
+                    return currencyBRL(toNumberBR(val));
+                };
                 const itemLossCtx = document.getElementById('itemLossChart').getContext('2d');
                 itemLossChart = new Chart(itemLossCtx, {
                     type: 'bar',
                     data: { labels: realData.byItemType.labels, datasets: [{ label: 'Perdas por Tipo (R$)', data: realData.byItemType.values, backgroundColor: ['rgba(130, 10, 209, 0.7)','rgba(54, 162, 235, 0.7)','rgba(255, 99, 132, 0.7)','rgba(75, 192, 192, 0.7)','rgba(255, 159, 64, 0.7)'], borderColor: ['rgba(130, 10, 209, 1)','rgba(54, 162, 235, 1)','rgba(255, 99, 132, 1)','rgba(75, 192, 192, 1)','rgba(255, 159, 64, 1)'], borderWidth: 1 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => currencyBRL(v) } } } }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => currencyBRL(toNumberBR(v)) } } } }
                 });
                 const buildingLossCtx = document.getElementById('buildingLossChart').getContext('2d');
                 buildingLossChart = new Chart(buildingLossCtx, {
@@ -1153,7 +1179,7 @@
                 monthlyLossChart = new Chart(monthlyLossCtx, {
                     type: 'line',
                     data: { labels: realData.period.labels, datasets: [{ label: `Evolução ${currentChartPeriod === 'monthly' ? 'Mensal' : currentChartPeriod === 'quarterly' ? 'Trimestral' : 'Anual'} (R$)`, data: realData.period.values, fill: false, borderColor: 'rgba(130, 10, 209, 1)', backgroundColor: 'rgba(130, 10, 209, 0.2)', tension: 0.15, borderWidth: 2, pointBackgroundColor: 'rgba(130, 10, 209, 1)', pointRadius: 3, pointHoverRadius: 5 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => currencyBRL(v) } }, x: { title: { display: true, text: currentChartPeriod === 'monthly' ? 'Mês' : currentChartPeriod === 'quarterly' ? 'Trimestre' : 'Ano' } } } }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => currencyBRL(toNumberBR(v)) } }, x: { title: { display: true, text: currentChartPeriod === 'monthly' ? 'Mês' : currentChartPeriod === 'quarterly' ? 'Trimestre' : 'Ano' } } } }
                 });
                 const reposicaoCtx = document.getElementById('reposicaoChart').getContext('2d');
                 reposicaoChart = new Chart(reposicaoCtx, {
@@ -1261,7 +1287,13 @@
         async function calculateLossValue() {
             const loadingElement = document.getElementById('budgetLoading'); const lossValueDisplay = document.getElementById('lossValueDisplay');
             loadingElement.style.display = 'flex'; lossValueDisplay.style.display = 'none';
-            try { const lossData = await extractRealDataFromSheet(currentChartPeriod); const totalLoss = (lossData.period.values || []).reduce((sum, v) => sum + v, 0); document.getElementById('totalLossValue').textContent = currencyBRL(totalLoss); lossValueDisplay.style.display = 'block'; } catch (e) { console.error('Erro ao calcular perdas:', e); } finally { loadingElement.style.display = 'none'; }
+            try {
+                const lossData = await extractRealDataFromSheet(currentChartPeriod);
+                const values = normalizeArrayNumbers(lossData.period?.values || []);
+                const totalLoss = safeSum(values);
+                document.getElementById('totalLossValue').textContent = currencyBRL(totalLoss);
+                lossValueDisplay.style.display = 'block';
+            } catch (e) { console.error('Erro ao calcular perdas:', e); } finally { loadingElement.style.display = 'none'; }
         }
         function exportBudgetData() { showMessage('Exportando dados de orçamento...', 'success'); setTimeout(function() { showMessage('Dados exportados com sucesso!', 'success'); }, 1200); }
         function generateId() { return Math.random().toString(36).substring(2, 10); }
