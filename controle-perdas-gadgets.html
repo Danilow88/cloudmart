@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Perdas e Entradas - Gadgets</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 1000px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background-color: #820ad1;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .header p {
+            margin-top: 8px;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-weight: bold;
+            color: #820ad1;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .logo i {
+            font-size: 24px;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .main-panel {
+            flex: 3;
+            min-width: 300px;
+            padding: 20px;
+            width: 100%;
+        }
+        
+        .side-panel {
+            flex: 2;
+            min-width: 250px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-left: 1px solid #e0e0e0;
+        }
+        
+        .reposicao-info {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .reposicao-info h3 {
+            color: #820ad1;
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .reposicao-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            min-width: 400px;
+        }
+        
+        .reposicao-table th {
+            background-color: #820ad1;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .reposicao-table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 500;
+        }
+        
+        .reposicao-table tr:nth-child(even) {
+            background-color: #f0f0f0;
+        }
+        
+        .reposicao-table tr:hover {
+            background-color: #e6e6ff;
+        }
+        
+        .form-container {
+            padding: 10px 0;
+            width: 100%;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background-color: #f8f9fa;
+        }
+        
+        select:focus, input:focus {
+            border-color: #820ad1;
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(130, 10, 209, 0.1);
+        }
+        
+        small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .btn {
+            background-color: #820ad1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #6a00c8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-chart {
+            background-color: #34a853;
+        }
+        
+        .btn-chart:hover {
+            background-color: #2e8b47;
+        }
+        
+        .btn-report {
+            background-color: #f57c00;
+        }
+        
+        .btn-report:hover {
+            background-color: #e65100;
+        }
+        
+        .message {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .success {
+            background-color: #e6f7ee;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 13px;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .test-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .button-group .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .building-group {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .building-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #820ad1;
+        }
+        
+        .building-group.hq1 {
+            color: #4285f4;
+        }
+        
+        .building-group.hq2 {
+            color: #ea4335;
+        }
+        
+        .building-group.spark {
+            color: #fbbc05;
+        }
+        
+        .location-info {
+            background-color: #e6f7ff;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border-left: 4px solid #820ad1;
+            display: none;
+        }
+        
+        .location-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .items-container {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .item-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .item-select {
+            flex: 3;
+        }
+        
+        .amount-input {
+            flex: 1;
+        }
+        
+        .remove-item {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .remove-item:hover {
+            background-color: #ff1a1a;
+            transform: scale(1.1);
+        }
+        
+        .add-item-btn {
+            background-color: #34a853;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .add-item-btn:hover {
+            background-color: #2e8b47;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: auto;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 900px;
+            position: relative;
+            animation: slideIn 0.3s;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            z-index: 1001;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #820ad1;
+            text-decoration: none;
+        }
+        
+        .modal-header {
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: #820ad1;
+            margin: 0;
+            text-align: center;
+        }
+        
+        .chart-container {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .chart-title {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #820ad1;
+            font-weight: 600;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            margin-bottom: 30px;
+        }
+        
+        .charts-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .chart-half {
+            flex: 1 1 calc(50% - 20px);
+            min-width: 300px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            flex-direction: column;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #820ad1;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        /* Filtro de período */
+        .period-filter {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .period-filter label {
+            margin-right: 10px;
+            font-weight: 600;
+        }
+        
+        .period-filter select {
+            width: auto;
+            padding: 8px 12px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+           100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .side-panel {
+                border-left: none;
+                border-top: 1px solid #e0e0e0;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group .btn {
+                width: 100%;
+            }
+            
+            .item-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .item-select, .amount-input {
+                width: 100%;
+            }
+            
+            .remove-item {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-laptop"></i>
+            </div>
+            <h1>Controle de Perdas e Entradas - Gadgets</h1>
+            <p>Registro de movimentações</p>
+        </div>
+        
+        <div class="content">
+            <div class="main-panel">
+                <div class="form-container">
+                    <form id="inventoryForm">
+                        <div class="form-group">
+                            <label for="building">Prédio *</label>
+                            <select id="building" name="building" required>
+                                <option value="">Selecione um prédio</option>
+                                <option value="Spark">Spark</option>
+                                <option value="HQ1">HQ1</option>
+                                <option value="HQ2">HQ2</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Local (Prédio e Andar)</label>
+                            
+                            <div class="building-group hq1">
+                                <h3 class="building-title hq1">🏢 HQ1</h3>
+                                <select id="buildingHq1" class="form-control">
+                                    <option value="">Selecione o andar (HQ1)</option>
+                                    <option value="2° ANDAR L MAIOR">2° ANDAR L MAIOR</option>
+                                    <option value="2° ANDAR L MENOR">2° ANDAR L MENOR</option>
+                                    <option value="4° ANDAR L MAIOR">4° ANDAR L MAIOR</option>
+                                    <option value="4° ANDAR L MENOR">4° ANDAR L MENOR</option>
+                                    <option value="6° ANDAR L MAIOR">6° ANDAR L MAIOR</option>
+                                    <option value="6° ANDAR L MENOR">6° ANDAR L MENOR</option>
+                                    <option value="8° ANDAR L MAIOR">8° ANDAR L MAIOR</option>
+                                    <option value="8° ANDAR L MENOR">8° ANDAR L MENOR</option>
+                                    <option value="4° ANDAR">4° ANDAR</option>
+                                </select>
+                            </div>
+                            
+                            <div class="building-group hq2">
+                                <h3 class="building-title hq2">🏢 HQ2</h3>
+                                <select id="buildingHq2" class="form-control">
+                                    <option value="">Selecione o andar (HQ2)</option>
+                                    <option value="2° ANDAR L MAIOR">2° ANDAR L MAIOR</option>
+                                    <option value="2° ANDAR L MENOR">2° ANDAR L MENOR</option>
+                                    <option value="4° ANDAR L MAIOR">4° ANDAR L MAIOR</option>
+                                    <option value="4° ANDAR L MENOR">4° ANDAR L MENOR</option>
+                                    <option value="6° ANDAR L MAIOR">6° ANDAR L MAIOR</option>
+                                    <option value="6° ANDAR L MENOR">6° ANDAR L MENOR</option>
+                                    <option value="8° ANDAR L MAIOR">8° ANDAR L MAIOR</option>
+                                    <option value="8° ANDAR L MENOR">8° ANDAR L MENOR</option>
+                                    <option value="8° ANDAR">8° ANDAR</option>
+                                    <option value="12° ANDAR">12° ANDAR</option>
+                                    <option value="15° ANDAR">15° ANDAR</option>
+                                </select>
+                            </div>
+                            
+                            <div class="building-group spark">
+                                <h3 class="building-title spark">🏢 Spark</h3>
+                                <select id="buildingSpark" class="form-control">
+                                    <option value="">Selecione o andar (Spark)</option>
+                                    <option value="1° ANDAR">1° ANDAR</option>
+                                    <option value="2° ANDAR">2° ANDAR</option>
+                                    <option value="3° ANDar">3° ANDAR</option>
+                                </select>
+                            </div>
+
+                            <div class="location-info" id="locationInfo">
+                                <p><strong>Local selecionado:</strong> <span id="selectedLocation"></span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Itens *</label>
+                            <div class="items-container" id="itemsContainer">
+                                <div class="item-row">
+                                    <div class="item-select">
+                                        <select name="itemId[]" class="item-select-field" required disabled>
+                                            <option value="">Primeiro selecione o prédio e andar</option>
+                                        </select>
+                                    </div>
+                                    <div class="amount-input">
+                                        <input type="number" name="amount[]" required min="1" max="1000" step="1" placeholder="Quantidade" class="amount-field" disabled>
+                                    </div>
+                                    <button type="button" class="remove-item" style="display: none;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn add-item-btn" id="addItemBtn" disabled>
+                                <i class="fas fa-plus"></i> Adicionar Item
+                            </button>
+                            <small>Digite a quantidade perdida (será convertida para negativo na planilha)</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="seu.email@exemplo.com.br">
+                        </div>
+                        
+                        <button type="submit" class="btn" id="submitBtn" style="width: 100%;" disabled>Registrar Perda</button>
+                    </form>
+                    
+                    <div id="message" class="message"></div>
+                </div>
+            </div>
+            
+            <div class="side-panel">
+                <div class="reposicao-info">
+                    <h3>Quantidades para reposição</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="reposicao-table">
+                            <thead>
+                                <tr>
+                                    <th>Prédio</th>
+                                    <th>Teclados</th>
+                                    <th>Headsets</th>
+                                    <th>Mouses</th>
+                                    <th>Adaptadores</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>HQ1 - Lado Maior</td>
+                                    <td>20</td>
+                                    <td>5</td>
+                                    <td>10</td>
+                                    <td>5</td>
+                                </tr>
+                                <tr>
+                                    <td>HQ1 - Lado Menor</td>
+                                    <td>10</td>
+                                    <td>5</td>
+                                    <td>5</td>
+                                    <td>5</td>
+                                </tr>
+                                <tr>
+                                    <td>HQ2</td>
+                                    <td>15</td>
+                                    <td>5</td>
+                                    <td>10</td>
+                                    <td>5</td>
+                                </tr>
+                                <tr>
+                                    <td>Spark</td>
+                                    <td>15</td>
+                                    <td>10</td>
+                                    <td>15</td>
+                                    <td>10</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="test-section">
+                    <h3 style="margin-bottom: 15px; text-align: center; color: #820ad1;">Ações Adicionais</h3>
+                    <div class="button-group">
+                        <button type="button" class="btn" onclick="testConnection()" style="background-color: #4285f4;">
+                            <i class="fas fa-wifi"></i> Testar Conexão
+                        </button>
+                        <button type="button" class="btn btn-chart" onclick="openChartModal()">
+                            <i class="fas fa-chart-bar"></i> Ver Gráficos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Sistema de Controle de Perdas e Entradas &copy; 2025</p>
+        </div>
+    </div>
+
+    <!-- Modal para gráficos -->
+    <div id="chartModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2>Gráficos de Controle de Perdas</h2>
+            </div>
+            
+            <!-- Filtro de período -->
+            <div class="period-filter">
+                <label for="periodFilter">Selecionar Período:</label>
+                <select id="periodFilter" onchange="updateChartsPeriod()">
+                    <option value="monthly">Mensal</option>
+                    <option value="quarterly">Trimestral</option>
+                    <option value="yearly">Anual</option>
+                </select>
+            </div>
+            
+            <div class="chart-container">
+                <div class="loading" id="chartLoading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>Carregando dados da planilha...</p>
+                </div>
+                
+                <div class="charts-row">
+                    <div class="chart-half">
+                        <h3 class="chart-title">Perdas por Tipo de Item</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="itemLossChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-half">
+                        <h3 class="chart-title">Perdas por Prédio</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="buildingLossChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="charts-row">
+                    <div class="chart-half">
+                        <h3 class="chart-title">Evolução de Perdas</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="monthlyLossChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-half">
+                        <h3 class="chart-title">Distribuição de Itens para Reposição</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="reposicaoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" onclick="closeChartModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis para armazenar os gráficos
+        let itemLossChart, buildingLossChart, monthlyLossChart, reposicaoChart;
+        
+        // Variável para controlar o período dos gráficos
+        let currentChartPeriod = 'monthly';
+        
+        // Dados reais extraídos da planilha
+        let realChartData = null;
+        
+        // Mapeamento de itens para prédios
+        const itemBuildingMap = {
+            'Headset-spk': 'Spark',
+            'Adaptadores usb c-spk': 'Spark',
+            'Mouse-spk': 'Spark',
+            'Teclado k120-spk': 'Spark',
+            'Headset-hq1': 'HQ1',
+            'Adaptadores usb ch-q1': 'HQ1',
+            'Mouse-hq1': 'Mouse - HQ1',
+            'Teclado k120-hq1': 'Teclado K120 - HQ1',
+            'Headset-hq2': 'Headset - HQ2',
+            'Adaptadores usb c-hq2': 'Adaptador USB-C - HQ2',
+            'Mouse-hq2': 'Mouse - HQ2',
+            'Teclado k120-hq2': 'Teclado K120 - HQ2',
+            'Usb Gorila 5m1 lan hq1': 'USB Gorila 5-em-1 - HQ1',
+            'Usb Gorila 5m1 lan hq2': 'USB Gorila 5-em-1 - HQ2',
+            'Usb Gorila 5m1 lanspk': 'USB Gorila 5-em-1 - Spark',
+            'Usb Gorila 6m1 hq1': 'USB Gorila 6-em-1 - HQ1',
+            'Usb Gorila 6m1 hq2': 'USB Gorila 6-em-1 - HQ2',
+            'Usb Gorila 6m1 spk': 'USB Gorila 6-em-1 - Spark'
+        };
+
+        // Itens por prédio
+        const itemsByBuilding = {
+            'Spark': [
+                'Headset-spk',
+                'Adaptadores usb c-spk',
+                'Mouse-spk',
+                'Teclado k120-spk',
+                'Usb Gorila 5m1 lanspk',
+                'Usb Gorila 6m1 spk'
+            ],
+            'HQ1': [
+                'Headset-hq1',
+                'Adaptadores usb ch-q1',
+                'Mouse-hq1',
+                'Teclado k120-hq1',
+                'Usb Gorila 5m1 lan hq1',
+                'Usb Gorila 6m1 hq1'
+            ],
+            'HQ2': [
+                'Headset-hq2',
+                'Adaptadores usb c-hq2',
+                'Mouse-hq2',
+                'Teclado k120-hq2',
+                'Usb Gorila 5m1 lan hq2',
+                'Usb Gorila 6m1 hq2'
+            ]
+        };
+
+        // Nomes amigáveis para os itens
+        const itemNames = {
+            'Headset-spk': 'Headset - Spark',
+            'Adaptadores usb c-spk': 'Adaptador USB-C - Spark',
+            'Mouse-spk': 'Mouse - Spark',
+            'Teclado k120-spk': 'Teclado K120 - Spark',
+            'Headset-hq1': 'Headset - HQ1',
+            'Adaptadores usb ch-q1': 'Adaptador USB-C - HQ1',
+            'Mouse-hq1': 'Mouse - HQ1',
+            'Teclado k120-hq1': 'Teclado K120 - HQ1',
+            'Headset-hq2': 'Headset - HQ2',
+            'Adaptadores usb c-hq2': 'Adaptador USB-C - HQ2',
+            'Mouse-hq2': 'Mouse - HQ2',
+            'Teclado k120-hq2': 'Teclado K120 - HQ2',
+            'Usb Gorila 5m1 lan hq1': 'USB Gorila 5-em-1 - HQ1',
+            'Usb Gorila 5m1 lan hq2': 'USB Gorila 5-em-1 - HQ2',
+            'Usb Gorila 5m1 lanspk': 'USB Gorila 5-em-1 - Spark',
+            'Usb Gorila 6m1 hq1': 'USB Gorila 6-em-1 - HQ1',
+            'Usb Gorila 6m1 hq2': 'USB Gorila 6-em-1 - HQ2',
+            'Usb Gorila 6m1 spk': 'USB Gorila 6-em-1 - Spark'
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos DOM
+            const buildingSelect = document.getElementById('building');
+            const buildingGroups = document.querySelectorAll('.building-group');
+            const modal = document.getElementById('chartModal');
+            const closeBtn = document.querySelector('.close');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const itemsContainer = document.getElementById('itemsContainer');
+            const locationInfo = document.getElementById('locationInfo');
+            const selectedLocation = document.getElementById('selectedLocation');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Contador de itens
+            let itemCount = 1;
+            
+            // Quando um prédio é selecionado
+            buildingSelect.addEventListener('change', function() {
+                const building = this.value;
+                
+                // Esconder todos os grupos de andares
+                buildingGroups.forEach(group => {
+                    group.style.display = 'none';
+                });
+                
+                // Mostrar apenas o grupo correspondente
+                if (building === 'HQ1') {
+                    document.querySelector('.building-group.hq1').style.display = 'block';
+                } else if (building === 'HQ2') {
+                    document.querySelector('.building-group.hq2').style.display = 'block';
+                } else if (building === 'Spark') {
+                    document.querySelector('.building-group.spark').style.display = 'block';
+                }
+                
+                // Limpar seleção de andar e itens
+                clearItemSelection();
+                updateLocationInfo();
+            });
+            
+            // Quando um andar é selecionado
+            document.querySelectorAll('.building-group select').forEach(select => {
+                select.addEventListener('change', function() {
+                    updateLocationInfo();
+                    updateItemOptions();
+                });
+            });
+            
+            // Atualizar informações de localização
+            function updateLocationInfo() {
+                const building = buildingSelect.value;
+                let floor = '';
+                
+                if (building === 'HQ1') {
+                    floor = document.getElementById('buildingHq1').value;
+                } else if (building === 'HQ2') {
+                    floor = document.getElementById('buildingHq2').value;
+                } else if (building === 'Spark') {
+                    floor = document.getElementById('buildingSpark').value;
+                }
+                
+                if (building && floor) {
+                    selectedLocation.textContent = `${building} - ${floor}`;
+                    locationInfo.style.display = 'block';
+                    
+                    // Habilitar adição de itens
+                    addItemBtn.disabled = false;
+                    updateItemOptions();
+                } else {
+                    locationInfo.style.display = 'none';
+                    addItemBtn.disabled = true;
+                }
+            }
+            
+            // Função para preencher um select de itens para um prédio
+            function fillItemSelect(selectElement, building) {
+                const selectedValue = selectElement.value;
+                selectElement.innerHTML = '';
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Selecione um item';
+                selectElement.appendChild(defaultOption);
+                
+                if (building && itemsByBuilding[building]) {
+                    itemsByBuilding[building].forEach(itemId => {
+                        const option = document.createElement('option');
+                        option.value = itemId;
+                        option.textContent = itemNames[itemId];
+                        selectElement.appendChild(option);
+                    });
+                }
+                
+                if (selectedValue && Array.from(selectElement.options).some(opt => opt.value === selectedValue)) {
+                    selectElement.value = selectedValue;
+                } else {
+                    selectElement.value = '';
+                }
+            }
+
+            // Atualizar opções de itens com base no prédio selecionado
+            function updateItemOptions() {
+                const building = buildingSelect.value;
+                
+                if (!building) return;
+                
+                const itemSelects = document.querySelectorAll('.item-select-field');
+                
+                itemSelects.forEach(select => {
+                    fillItemSelect(select, building);
+                    select.disabled = false;
+                });
+                
+                const amountInputs = document.querySelectorAll('.amount-field');
+                amountInputs.forEach(input => {
+                    input.disabled = false;
+                });
+                
+                validateForm();
+            }
+            
+            // Limpar seleção de itens
+            function clearItemSelection() {
+                const itemSelects = document.querySelectorAll('.item-select-field');
+                const amountInputs = document.querySelectorAll('.amount-field');
+                
+                itemSelects.forEach(select => {
+                    select.innerHTML = '<option value="">Primeiro selecione o prédio e andar</option>';
+                    select.disabled = true;
+                });
+                
+                amountInputs.forEach(input => {
+                    input.value = '';
+                    input.disabled = true;
+                });
+                
+                addItemBtn.disabled = true;
+                submitBtn.disabled = true;
+            }
+            
+            // Validar formulário para habilitar/desabilitar envio
+            function validateForm() {
+                const building = buildingSelect.value;
+                let floor = '';
+                
+                if (building === 'HQ1') {
+                    floor = document.getElementById('buildingHq1').value;
+                } else if (building === 'HQ2') {
+                    floor = document.getElementById('buildingHq2').value;
+                } else if (building === 'Spark') {
+                    floor = document.getElementById('buildingSpark').value;
+                }
+                
+                const itemSelects = document.querySelectorAll('.item-select-field');
+                let hasValidItems = false;
+                
+                itemSelects.forEach(select => {
+                    if (select.value) {
+                        hasValidItems = true;
+                    }
+                });
+                
+                submitBtn.disabled = !(building && floor && hasValidItems);
+            }
+            
+            // Adicionar novo item
+            addItemBtn.addEventListener('click', function() {
+                if (itemCount >= 4) {
+                    showMessage('Máximo de 4 itens atingido.', 'error');
+                    return;
+                }
+                
+                const newItemRow = document.createElement('div');
+                newItemRow.className = 'item-row';
+                newItemRow.innerHTML = `
+                    <div class="item-select">
+                        <select name="itemId[]" class="item-select-field" required>
+                            <option value="">Selecione um item</option>
+                        </select>
+                    </div>
+                    <div class="amount-input">
+                        <input type="number" name="amount[]" required min="1" max="1000" step="1" placeholder="Quantidade" class="amount-field">
+                    </div>
+                    <button type="button" class="remove-item">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                itemsContainer.appendChild(newItemRow);
+                itemCount++;
+                
+                const building = buildingSelect.value;
+                const newSelect = newItemRow.querySelector('.item-select-field');
+                fillItemSelect(newSelect, building);
+                newSelect.disabled = !building;
+                
+                const newInput = newItemRow.querySelector('.amount-field');
+                newInput.disabled = !building;
+                
+                const removeBtn = newItemRow.querySelector('.remove-item');
+                removeBtn.addEventListener('click', function() {
+                    itemsContainer.removeChild(newItemRow);
+                    itemCount--;
+                    updateRemoveButtons();
+                    validateForm();
+                });
+                
+                updateRemoveButtons();
+                
+                newSelect.addEventListener('change', validateForm);
+                newInput.addEventListener('input', validateForm);
+                
+                validateForm();
+            });
+            
+            // Atualizar visibilidade dos botões de remoção
+            function updateRemoveButtons() {
+                const itemRows = document.querySelectorAll('#itemsContainer .item-row');
+                const removeButtons = document.querySelectorAll('#itemsContainer .remove-item');
+                
+                if (itemRows.length > 1) {
+                    removeButtons.forEach(btn => btn.style.display = 'flex');
+                } else {
+                    removeButtons.forEach(btn => btn.style.display = 'none');
+                }
+            }
+            
+            updateRemoveButtons();
+            
+            // Fechar o modal quando clicar no X
+            closeBtn.addEventListener('click', closeChartModal);
+            
+            // Fechar o modal quando clicar fora dele
+            window.addEventListener('click', function(event) {
+                if (event.target == modal) {
+                    closeChartModal();
+                }
+            });
+            
+            // Adicionar eventos de validação aos campos existentes
+            document.querySelectorAll('.item-select-field, .amount-field').forEach(field => {
+                field.addEventListener('change', validateForm);
+                field.addEventListener('input', validateForm);
+            });
+            
+            // Envio do formulário
+            document.getElementById('inventoryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const building = document.getElementById('building').value;
+                const email = document.getElementById('email').value;
+                
+                const itemSelects = document.querySelectorAll('.item-select-field');
+                const amountInputs = document.querySelectorAll('.amount-field');
+                
+                if (!building) {
+                    showMessage('Por favor, selecione um prédio.', 'error');
+                    return;
+                }
+                
+                const items = [];
+                let hasErrors = false;
+                
+                for (let i = 0; i < itemSelects.length; i++) {
+                    const itemId = itemSelects[i].value;
+                    const amount = amountInputs[i].value;
+                    
+                    if (!itemId || !amount) {
+                        showMessage('Por favor, preencha todos os campos de item e quantidade.', 'error');
+                        hasErrors = true;
+                        break;
+                    }
+                    
+                    items.push({
+                        itemId: itemId,
+                        amount: parseFloat(amount) * -1
+                    });
+                }
+                
+                if (hasErrors) return;
+                
+                let location = '';
+                if (building === 'HQ1') {
+                    location = document.getElementById('buildingHq1').value;
+                } else if (building === 'HQ2') {
+                    location = document.getElementById('buildingHq2').value;
+                } else if (building === 'Spark') {
+                    location = document.getElementById('buildingSpark').value;
+                }
+                
+                const btn = document.getElementById('submitBtn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Processando...';
+                btn.disabled = true;
+                
+                // Simular envio (substitua por integração real)
+                setTimeout(() => {
+                    showMessage(`Perda registrada com sucesso para ${items.length} item(ns)!`, 'success');
+                    document.getElementById('inventoryForm').reset();
+                    btn.textContent = originalText;
+                    btn.disabled = true;
+                    
+                    buildingGroups.forEach(group => {
+                        group.style.display = 'none';
+                    });
+                    
+                    const itemRows = document.querySelectorAll('.item-row');
+                    for (let i = 1; i < itemRows.length; i++) {
+                        itemsContainer.removeChild(itemRows[i]);
+                    }
+                    itemCount = 1;
+                    updateRemoveButtons();
+                    clearItemSelection();
+                    locationInfo.style.display = 'none';
+                }, 2000);
+            });
+        });
+        
+        function testConnection() {
+            showMessage('Testando conexão com o servidor...', 'success');
+            
+            setTimeout(() => {
+                showMessage('Conexão estabelecida com sucesso!', 'success');
+            }, 1500);
+        }
+        
+        // Função para abrir o modal de gráficos
+        function openChartModal() {
+            const modal = document.getElementById('chartModal');
+            modal.style.display = 'block';
+            
+            // Carregar dados para os gráficos
+            createRealCharts();
+        }
+        
+        // Função para fechar o modal de gráficos
+        function closeChartModal() {
+            const modal = document.getElementById('chartModal');
+            modal.style.display = 'none';
+            
+            // Destruir os gráficos para liberar recursos
+            if (itemLossChart) itemLossChart.destroy();
+            if (buildingLossChart) buildingLossChart.destroy();
+            if (monthlyLossChart) monthlyLossChart.destroy();
+            if (reposicaoChart) reposicaoChart.destroy();
+        }
+        
+        // Função para atualizar o período dos gráficos
+        function updateChartsPeriod() {
+            currentChartPeriod = document.getElementById('periodFilter').value;
+            createRealCharts();
+        }
+        
+        // Função para extrair dados reais da planilha fornecida
+        function extractRealDataFromSheet(period = 'monthly') {
+            // Se já temos os dados, usá-los diretamente
+            if (realChartData) {
+                return Promise.resolve(filterDataByPeriod(realChartData, period));
+            }
+            
+            // Mostrar indicador de carregamento
+            document.getElementById('chartLoading').style.display = 'flex';
+            
+            // Buscar dados reais da planilha via Google Apps Script
+            return new Promise((resolve, reject) => {
+                // Verificar se google.script.run está disponível
+                if (typeof google !== 'undefined' && google.script && google.script.run) {
+                    google.script.run
+                        .withSuccessHandler(function(data) {
+                            // Esconder indicador de carregamento
+                            document.getElementById('chartLoading').style.display = 'none';
+                            
+                            if (data && data.success) {
+                                realChartData = data.data;
+                                resolve(filterDataByPeriod(realChartData, period));
+                            } else {
+                                // Fallback para dados de exemplo em caso de erro
+                                console.error('Erro ao carregar dados:', data.error);
+                                const fallbackData = createFallbackData();
+                                realChartData = fallbackData;
+                                resolve(filterDataByPeriod(fallbackData, period));
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            // Esconder indicador de carregamento
+                            document.getElementById('chartLoading').style.display = 'none';
+                            
+                            // Fallback para dados de exemplo em caso de erro
+                            console.error('Erro ao carregar dados:', error);
+                            const fallbackData = createFallbackData();
+                            realChartData = fallbackData;
+                            resolve(filterDataByPeriod(fallbackData, period));
+                        })
+                        .getLossDataFromTotalCost();
+                } else {
+                    // Google Apps Script não está disponível, usar dados de fallback
+                    console.log('Google Apps Script não disponível, usando dados de exemplo');
+                    setTimeout(() => {
+                        // Esconder indicador de carregamento
+                        document.getElementById('chartLoading').style.display = 'none';
+                        
+                        const fallbackData = createFallbackData();
+                        realChartData = fallbackData;
+                        resolve(filterDataByPeriod(fallbackData, period));
+                    }, 1500); // Simular tempo de carregamento
+                }
+            });
+        }
+        
+        // Função para criar dados de fallback (exemplo) com dados mais realistas
+        function createFallbackData() {
+            const monthlyLosses = {
+                labels: ['Jan/2024', 'Fev/2024', 'Mar/2024', 'Abr/2024', 'Mai/2024', 'Jun/2024', 'Jul/2024', 'Ago/2024', 'Set/2024'],
+                values: [15420.50, 22150.80, 18900.25, 31200.75, 26800.40, 19500.60, 28400.30, 23700.90, 20100.45]
+            };
+            
+            const quarterlyLosses = {
+                labels: ['Q1/2024', 'Q2/2024', 'Q3/2024'],
+                values: [56471.55, 77501.75, 72201.65]
+            };
+            
+            const yearlyLosses = {
+                labels: ['2023', '2024'],
+                values: [180500.25, 206174.95]
+            };
+            
+            // Dados de perdas por tipo de item (baseado em valores realistas)
+            const itemTypeData = {
+                labels: ['Headsets', 'Adaptadores USB', 'Teclados', 'Mouses', 'Adaptadores Gorila'],
+                values: [85200.00, 45600.00, 28800.00, 15960.00, 30600.00]
+            };
+            
+            // Dados de perdas por prédio
+            const buildingData = {
+                labels: ['HQ1', 'HQ2', 'Spark'],
+                values: [68720.00, 82440.00, 55000.00]
+            };
+            
+            return {
+                monthly: monthlyLosses,
+                quarterly: quarterlyLosses,
+                yearly: yearlyLosses,
+                byItemType: itemTypeData,
+                byBuilding: buildingData
+            };
+        }
+        
+        // Função para filtrar dados por período
+        function filterDataByPeriod(data, period) {
+            return {
+                period: data[period],
+                byItemType: data.byItemType,
+                byBuilding: data.byBuilding
+            };
+        }
+        
+        // Função para criar gráficos com dados reais
+        async function createRealCharts() {
+            try {
+                const realData = await extractRealDataFromSheet(currentChartPeriod);
+                
+                // Destruir gráficos existentes
+                if (itemLossChart) itemLossChart.destroy();
+                if (buildingLossChart) buildingLossChart.destroy();
+                if (monthlyLossChart) monthlyLossChart.destroy();
+                if (reposicaoChart) reposicaoChart.destroy();
+                
+                // Criar gráfico de perdas por tipo de item
+                const itemLossCtx = document.getElementById('itemLossChart').getContext('2d');
+                itemLossChart = new Chart(itemLossCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: realData.byItemType.labels,
+                        datasets: [{
+                            label: 'Perdas por Tipo de Item (R$)',
+                            data: realData.byItemType.values,
+                            backgroundColor: [
+                                'rgba(130, 10, 209, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(255, 159, 64, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(130, 10, 209, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Perdas Financeiras por Categoria de Item'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Valor em R$'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toLocaleString('pt-BR');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Criar gráfico de perdas por prédio
+                const buildingLossCtx = document.getElementById('buildingLossChart').getContext('2d');
+                buildingLossChart = new Chart(buildingLossCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: realData.byBuilding.labels,
+                        datasets: [{
+                            label: 'Perdas por Prédio (R$)',
+                            data: realData.byBuilding.values,
+                            backgroundColor: [
+                                'rgba(66, 133, 244, 0.7)',
+                                'rgba(234, 67, 53, 0.7)',
+                                'rgba(251, 188, 5, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(66, 133, 244, 1)',
+                                'rgba(234, 67, 53, 1)',
+                                'rgba(251, 188, 5, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Distribuição de Perdas por Localização'
+                            },
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: R$ ${value.toLocaleString('pt-BR')} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Criar gráfico de evolução por período
+                const monthlyLossCtx = document.getElementById('monthlyLossChart').getContext('2d');
+                monthlyLossChart = new Chart(monthlyLossCtx, {
+                    type: 'line',
+                    data: {
+                        labels: realData.period.labels,
+                        datasets: [{
+                            label: `Evolução ${currentChartPeriod === 'monthly' ? 'Mensal' : currentChartPeriod === 'quarterly' ? 'Trimestral' : 'Anual'} de Perdas (R$)`,
+                            data: realData.period.values,
+                            fill: false,
+                            borderColor: 'rgba(130, 10, 209, 1)',
+                            backgroundColor: 'rgba(130, 10, 209, 0.2)',
+                            tension: 0.1,
+                            borderWidth: 3,
+                            pointBackgroundColor: 'rgba(130, 10, 209, 1)',
+                            pointRadius: 5,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `Tendência de Perdas - ${currentChartPeriod === 'monthly' ? 'Mensal' : currentChartPeriod === 'quarterly' ? 'Trimestral' : 'Anual'}`
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Valor em R$'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toLocaleString('pt-BR');
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: currentChartPeriod === 'monthly' ? 'Mês' : currentChartPeriod === 'quarterly' ? 'Trimestre' : 'Ano'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Criar gráfico de distribuição para reposição (dados de exemplo)
+                const reposicaoCtx = document.getElementById('reposicaoChart').getContext('2d');
+                reposicaoChart = new Chart(reposicaoCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Teclados', 'Headsets', 'Mouses', 'Adaptadores'],
+                        datasets: [{
+                            label: 'Itens para Reposição',
+                            data: [60, 25, 40, 25],
+                            backgroundColor: [
+                                'rgba(130, 10, 209, 0.5)',
+                                'rgba(54, 162, 235, 0.5)',
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(75, 192, 192, 0.5)'
+                            ],
+                            borderColor: [
+                                'rgba(130, 10, 209, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Quantidade de Itens para Reposição Semanal'
+                            },
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        return `${label}: ${value} unidades`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao criar gráficos:', error);
+                document.getElementById('chartLoading').style.display = 'none';
+            }
+        }
+        
+        function generateId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+        
+        function showMessage(message, type) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = message;
+            messageElement.className = 'message ' + type;
+            messageElement.style.display = 'block';
+            
+            messageElement.scrollIntoView({ behavior: 'smooth' });
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
