@@ -1115,14 +1115,23 @@
             setTimeout(() => { showMessage('Conexão estabelecida com sucesso!', 'success'); }, 1000);
         }
 
-        function openChartModal() { const modal = document.getElementById('chartModal'); modal.style.display = 'block'; createRealCharts(); }
+        function openChartModal() {
+            const modal = document.getElementById('chartModal');
+            modal.style.display = 'block';
+            // Aguarda o layout aplicar antes de renderizar os gráficos
+            requestAnimationFrame(() => { setTimeout(() => { createRealCharts(); }, 60); });
+        }
         function closeChartModal() { const modal = document.getElementById('chartModal'); modal.style.display = 'none'; if (itemLossChart) itemLossChart.destroy(); if (buildingLossChart) buildingLossChart.destroy(); if (monthlyLossChart) monthlyLossChart.destroy(); if (reposicaoChart) reposicaoChart.destroy(); }
         function openEntryModal() { document.getElementById('entryModal').style.display = 'block'; }
         function closeEntryModal() { document.getElementById('entryModal').style.display = 'none'; }
         function openBudgetModal() { const modal = document.getElementById('budgetModal'); modal.style.display = 'block'; loadBudgetData(); }
         function closeBudgetModal() { const modal = document.getElementById('budgetModal'); modal.style.display = 'none'; }
 
-        function updateChartsPeriod() { currentChartPeriod = document.getElementById('periodFilter').value; createRealCharts(); }
+        function updateChartsPeriod() {
+            currentChartPeriod = document.getElementById('periodFilter').value;
+            // Pequeno atraso para evitar cálculo com largura zero
+            requestAnimationFrame(() => { setTimeout(() => { createRealCharts(); }, 30); });
+        }
 
         function extractRealDataFromSheet(period = 'monthly') {
             if (realChartData) return Promise.resolve(filterDataByPeriod(realChartData, period));
@@ -1155,33 +1164,47 @@
 
         function filterDataByPeriod(data, period) { return { period: data[period], byItemType: data.byItemType, byBuilding: data.byBuilding }; }
 
+        function isChartAreaReady() {
+            const area = document.querySelector('#chartModal .chart-container');
+            if (!area) return false;
+            const rect = area.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+        }
+
         async function createRealCharts() {
             try {
+                // Se a área ainda não estiver com dimensões, tente novamente em breve
+                if (!isChartAreaReady()) { setTimeout(createRealCharts, 80); return; }
                 const realData = await extractRealDataFromSheet(currentChartPeriod);
                 if (itemLossChart) itemLossChart.destroy(); if (buildingLossChart) buildingLossChart.destroy(); if (monthlyLossChart) monthlyLossChart.destroy(); if (reposicaoChart) reposicaoChart.destroy();
                 const currencyTooltip = (context) => {
                     const val = typeof context.parsed === 'object' && context.parsed !== null ? context.parsed.y : context.parsed;
                     return currencyBRL(toNumberBR(val));
                 };
-                const itemLossCtx = document.getElementById('itemLossChart').getContext('2d');
+                const itemLossCanvas = document.getElementById('itemLossChart');
+                const buildingLossCanvas = document.getElementById('buildingLossChart');
+                const monthlyLossCanvas = document.getElementById('monthlyLossChart');
+                const reposicaoCanvas = document.getElementById('reposicaoChart');
+                if (!itemLossCanvas || !buildingLossCanvas || !monthlyLossCanvas || !reposicaoCanvas) return;
+                const itemLossCtx = itemLossCanvas.getContext('2d');
                 itemLossChart = new Chart(itemLossCtx, {
                     type: 'bar',
                     data: { labels: realData.byItemType.labels, datasets: [{ label: 'Perdas por Tipo (R$)', data: realData.byItemType.values, backgroundColor: ['rgba(130, 10, 209, 0.7)','rgba(54, 162, 235, 0.7)','rgba(255, 99, 132, 0.7)','rgba(75, 192, 192, 0.7)','rgba(255, 159, 64, 0.7)'], borderColor: ['rgba(130, 10, 209, 1)','rgba(54, 162, 235, 1)','rgba(255, 99, 132, 1)','rgba(75, 192, 192, 1)','rgba(255, 159, 64, 1)'], borderWidth: 1 }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => currencyBRL(toNumberBR(v)) } } } }
                 });
-                const buildingLossCtx = document.getElementById('buildingLossChart').getContext('2d');
+                const buildingLossCtx = buildingLossCanvas.getContext('2d');
                 buildingLossChart = new Chart(buildingLossCtx, {
                     type: 'pie',
                     data: { labels: realData.byBuilding.labels, datasets: [{ label: 'Perdas por Prédio (R$)', data: realData.byBuilding.values, backgroundColor: ['rgba(66, 133, 244, 0.7)','rgba(234, 67, 53, 0.7)','rgba(251, 188, 5, 0.7)'], borderColor: ['rgba(66, 133, 244, 1)','rgba(234, 67, 53, 1)','rgba(251, 188, 5, 1)'], borderWidth: 1 }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } } }
                 });
-                const monthlyLossCtx = document.getElementById('monthlyLossChart').getContext('2d');
+                const monthlyLossCtx = monthlyLossCanvas.getContext('2d');
                 monthlyLossChart = new Chart(monthlyLossCtx, {
                     type: 'line',
                     data: { labels: realData.period.labels, datasets: [{ label: `Evolução ${currentChartPeriod === 'monthly' ? 'Mensal' : currentChartPeriod === 'quarterly' ? 'Trimestral' : 'Anual'} (R$)`, data: realData.period.values, fill: false, borderColor: 'rgba(130, 10, 209, 1)', backgroundColor: 'rgba(130, 10, 209, 0.2)', tension: 0.15, borderWidth: 2, pointBackgroundColor: 'rgba(130, 10, 209, 1)', pointRadius: 3, pointHoverRadius: 5 }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => currencyBRL(toNumberBR(v)) } }, x: { title: { display: true, text: currentChartPeriod === 'monthly' ? 'Mês' : currentChartPeriod === 'quarterly' ? 'Trimestre' : 'Ano' } } } }
                 });
-                const reposicaoCtx = document.getElementById('reposicaoChart').getContext('2d');
+                const reposicaoCtx = reposicaoCanvas.getContext('2d');
                 reposicaoChart = new Chart(reposicaoCtx, {
                     type: 'doughnut',
                     data: { labels: ['Teclados', 'Headsets', 'Mouses', 'Adaptadores'], datasets: [{ label: 'Itens para Reposição', data: [60, 25, 40, 25], backgroundColor: ['rgba(130, 10, 209, 0.5)','rgba(54, 162, 235, 0.5)','rgba(255, 99, 132, 0.5)','rgba(75, 192, 192, 0.5)'], borderColor: ['rgba(130, 10, 209, 1)','rgba(54, 162, 235, 1)','rgba(255, 99, 132, 1)','rgba(75, 192, 192, 1)'], borderWidth: 1 }] },
