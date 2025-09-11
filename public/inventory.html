@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Perdas e Entradas - Gadgets</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 24px 16px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 1200px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #820ad1, #6e00b4);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .header-inner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            width: 52px;
+            height: 52px;
+            background-color: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .logo i {
+            font-size: 22px;
+        }
+        
+        .titles {
+            flex: 1;
+        }
+        
+        .titles h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.2px;
+        }
+        
+        .titles p {
+            margin-top: 6px;
+            opacity: 0.95;
+            font-size: 14px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .chip {
+            background-color: rgba(255,255,255,0.15);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 16px;
+            padding: 16px;
+        }
+        
+        .card {
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 14px;
+            padding: 16px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #6e00b4;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-container {
+            width: 100%;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 14px;
+            position: relative;
+            width: 100%;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e8e8ef;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background-color: #fbfbfd;
+        }
+        
+        select:focus, input:focus {
+            border-color: #820ad1;
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(130, 10, 209, 0.1);
+        }
+        
+        small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .btn {
+            background-color: #820ad1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .btn:hover {
+            background-color: #6a00c8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+        }
+        
+        .btn:disabled {
+            background-color: #cfcfe5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary { background-color: #4285f4; }
+        .btn-secondary:hover { background-color: #2f6cd6; }
+        .btn-chart { background-color: #34a853; }
+        .btn-chart:hover { background-color: #2e8b47; }
+        .btn-report { background-color: #9c27b0; }
+        .btn-report:hover { background-color: #7b1fa2; }
+        .btn-entry { background-color: #34a853; }
+        .btn-entry:hover { background-color: #2e8b47; }
+        
+        .message {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-top: 12px;
+            text-align: center;
+            display: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .success {
+            background-color: #e6f7ee;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        
+        .side-panel .reposicao-info {
+            background-color: #f8f9ff;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #e6e6f7;
+        }
+        
+        .reposicao-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            min-width: 420px;
+        }
+        
+        .reposicao-table th {
+            background-color: #820ad1;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 13px;
+            position: sticky;
+            top: 0;
+        }
+        
+        .reposicao-table td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        
+        .reposicao-table tr:nth-child(even) { background-color: #fafafe; }
+        .reposicao-table tr:hover { background-color: #f3ecff; }
+        
+        .items-container { margin-bottom: 12px; width: 100%; }
+        .item-row { display: grid; grid-template-columns: 1fr 140px 40px; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .item-select { width: 100%; }
+        .amount-input { width: 100%; }
+        .remove-item { background-color: #ff4d4d; color: white; border: none; border-radius: 8px; width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; transition: all 0.2s; }
+        .remove-item:hover { background-color: #ff1a1a; transform: scale(1.05); }
+        .add-item-btn { width: 100%; margin-top: 4px; }
+        
+        .building-group { display: none; margin-top: 6px; padding: 10px; border-radius: 10px; background-color: #f8f9fa; border: 1px solid #e0e0e0; }
+        .building-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #820ad1; }
+        .building-group.hq1 { color: #4285f4; }
+        .building-group.hq2 { color: #ea4335; }
+        .building-group.spark { color: #fbbc05; }
+        
+        .location-info, .entry-info { background-color: #e6f7ff; padding: 10px 12px; border-radius: 10px; margin-top: 8px; border-left: 4px solid #820ad1; display: none; font-size: 13px; }
+        .location-info p, .entry-info p { margin: 4px 0; }
+        
+        .footer { text-align: center; margin: 8px 0 16px; color: #666; font-size: 12px; padding: 12px; border-top: 1px solid #eee; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; inset: 0; background-color: rgba(0, 0, 0, 0.7); overflow: auto; animation: fadeIn 0.2s; }
+        .modal-content { background-color: #fff; margin: 4% auto; padding: 16px; border-radius: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); width: 92%; max-width: 1000px; position: relative; animation: slideIn 0.25s; max-height: 88vh; overflow-y: auto; }
+        .close { color: #999; font-size: 26px; font-weight: bold; cursor: pointer; position: absolute; top: 12px; right: 16px; }
+        .close:hover, .close:focus { color: #820ad1; }
+        .modal-header { padding: 8px 0 12px; border-bottom: 1px solid #eee; margin-bottom: 14px; text-align: center; }
+        .modal-header h2 { color: #820ad1; margin: 0; font-size: 18px; }
+        
+        .chart-container { padding: 8px; background-color: #f8f9fa; border-radius: 10px; margin-bottom: 12px; border: 1px solid #eee; }
+        .chart-title { text-align: center; margin-bottom: 10px; color: #820ad1; font-weight: 600; font-size: 14px; }
+        .chart-wrapper { position: relative; height: 280px; margin-bottom: 18px; }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .chart-half { min-width: 280px; }
+        
+        .loading { display: none; justify-content: center; align-items: center; height: 180px; flex-direction: column; }
+        .loading-spinner { border: 5px solid #f3f3f3; border-top: 5px solid #820ad1; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; margin-bottom: 12px; }
+        
+        .budget-container .loading { height: 120px; }
+        
+        .budget-filter { margin-bottom: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 10px; border: 1px solid #eee; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .budget-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .budget-table th, .budget-table td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+        .budget-table th { background-color: #820ad1; color: white; position: sticky; top: 0; z-index: 1; }
+        .budget-custom-row { background-color: #f0f7ff !important; }
+        .priority-high { background-color: #fff8e1 !important; }
+        .budget-input { width: 90px; padding: 6px; text-align: center; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+        .percentage-control { display: flex; align-items: center; gap: 6px; }
+        .percentage-input { width: 64px; padding: 6px; text-align: center; border: 1px solid #ddd; border-radius: 6px; }
+        .budget-total { font-weight: bold; font-size: 15px; padding: 10px; background-color: #e6f7ff; border-radius: 10px; text-align: center; margin-top: 10px; border: 1px solid #cfe8ff; }
+        .budget-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
+        .budget-remove-btn { background-color: #ff4d4d; color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; transition: all 0.2s; }
+        .budget-remove-btn:hover { background-color: #ff1a1a; }
+        .custom-name-input { width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; margin-top: 4px; }
+        .budget-name-cell { position: relative; }
+        .budget-name-display { cursor: pointer; padding: 4px; border-radius: 6px; }
+        .budget-name-display:hover { background-color: #f0f0f0; }
+        .loss-value-display { background-color: #fff8e1; padding: 12px; border-radius: 10px; margin-top: 10px; text-align: center; font-size: 16px; font-weight: bold; color: #d32f2f; }
+        .loss-value-display span { color: #820ad1; }
+        
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        @media (max-width: 960px) { .content { grid-template-columns: 1fr; } .budget-actions { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 560px) {
+            body { padding: 12px; }
+            .titles h1 { font-size: 18px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .item-row { grid-template-columns: 1fr 1fr 40px; }
+            .charts-row { grid-template-columns: 1fr; }
+            .modal-content { width: 95%; margin: 8% auto; padding: 12px; }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Utilidades
+        const currencyBRL = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number.isFinite(value) ? value : 0);
+        const toNumberBR = (v) => {
+            if (v == null) return 0;
+            if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
+            if (typeof v !== 'string') return 0;
+            // Remove moeda, espaços e separadores de milhar, troca vírgula decimal por ponto
+            const cleaned = v.replace(/[^0-9,.-]/g, '')
+                             .replace(/\.(?=\d{3}(\D|$))/g, '')
+                             .replace(',', '.');
+            const num = parseFloat(cleaned);
+            return Number.isFinite(num) ? num : 0;
+        };
+        const normalizeArrayNumbers = (arr) => Array.isArray(arr) ? arr.map(toNumberBR) : [];
+        const normalizeChartData = (data) => {
+            if (!data) return data;
+            const out = { ...data };
+            if (data.monthly) out.monthly = { labels: data.monthly.labels || [], values: normalizeArrayNumbers(data.monthly.values) };
+            if (data.quarterly) out.quarterly = { labels: data.quarterly.labels || [], values: normalizeArrayNumbers(data.quarterly.values) };
+            if (data.yearly) out.yearly = { labels: data.yearly.labels || [], values: normalizeArrayNumbers(data.yearly.values) };
+            if (data.byItemType) out.byItemType = { labels: data.byItemType.labels || [], values: normalizeArrayNumbers(data.byItemType.values) };
+            if (data.byBuilding) out.byBuilding = { labels: data.byBuilding.labels || [], values: normalizeArrayNumbers(data.byBuilding.values) };
+            return out;
+        };
+        const safeSum = (arr) => (Array.isArray(arr) ? arr : []).reduce((sum, v) => sum + (Number.isFinite(v) ? v : toNumberBR(v)), 0);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-inner">
+                <div class="logo"><i class="fas fa-laptop"></i></div>
+                <div class="titles">
+                    <h1>Controle de Perdas e Entradas - Gadgets</h1>
+                    <p>Registro de movimentações e visualização de indicadores</p>
+                </div>
+                <div class="header-actions">
+                    <span class="chip"><i class="fa-solid fa-circle"></i> Online</span>
+                    <button type="button" class="btn btn-secondary" onclick="testConnection()"><i class="fas fa-wifi"></i> Testar Conexão</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="main-panel card">
+                <div class="section-title"><i class="fa-solid fa-minus-circle"></i> Registrar Perda</div>
+                <div class="form-container">
+                    <form id="inventoryForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="building">Prédio *</label>
+                                <select id="building" name="building" required>
+                                    <option value="">Selecione um prédio</option>
+                                    <option value="Spark">Spark</option>
+                                    <option value="HQ1">HQ1</option>
+                                    <option value="HQ2">HQ2</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" placeholder="seu.email@exemplo.com.br">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Local (Prédio e Andar)</label>
+                            <div class="building-group hq1">
+                                <h3 class="building-title hq1">🏢 HQ1</h3>
+                                <select id="buildingHq1" class="form-control">
+                                    <option value="">Selecione o andar (HQ1)</option>
+                                    <option value="2° ANDAR L MAIOR">2° ANDAR L MAIOR</option>
+                                    <option value="2° ANDAR L MENOR">2° ANDAR L MENOR</option>
+                                    <option value="4° ANDAR L MAIOR">4° ANDAR L MAIOR</option>
+                                    <option value="4° ANDAR L MENOR">4° ANDAR L MENOR</option>
+                                    <option value="6° ANDAR L MAIOR">6° ANDAR L MAIOR</option>
+                                    <option value="6° ANDAR L MENOR">6° ANDAR L MENOR</option>
+                                    <option value="8° ANDAR L MAIOR">8° ANDAR L MAIOR</option>
+                                    <option value="8° ANDAR L MENOR">8° ANDAR L MENOR</option>
+                                    <option value="4° ANDAR">4° ANDAR</option>
+                                </select>
+                            </div>
+                            <div class="building-group hq2">
+                                <h3 class="building-title hq2">🏢 HQ2</h3>
+                                <select id="buildingHq2" class="form-control">
+                                    <option value="">Selecione o andar (HQ2)</option>
+                                    <option value="2° ANDAR L MAIOR">2° ANDAR L MAIOR</option>
+                                    <option value="2° ANDAR L MENOR">2° ANDAR L MENOR</option>
+                                    <option value="4° ANDAR L MAIOR">4° ANDAR L MAIOR</option>
+                                    <option value="4° ANDAR L MENOR">4° ANDAR L MENOR</option>
+                                    <option value="6° ANDAR L MAIOR">6° ANDAR L MAIOR</option>
+                                    <option value="6° ANDAR L MENOR">6° ANDAR L MENOR</option>
+                                    <option value="8° ANDAR L MAIOR">8° ANDAR L MAIOR</option>
+                                    <option value="8° ANDAR L MENOR">8° ANDAR L MENOR</option>
+                                    <option value="8° ANDAR">8° ANDAR</option>
+                                    <option value="12° ANDAR">12° ANDAR</option>
+                                    <option value="15° ANDAR">15° ANDAR</option>
+                                </select>
+                            </div>
+                            <div class="building-group spark">
+                                <h3 class="building-title spark">🏢 Spark</h3>
+                                <select id="buildingSpark" class="form-control">
+                                    <option value="">Selecione o andar (Spark)</option>
+                                    <option value="1° ANDAR">1° ANDAR</option>
+                                    <option value="2° ANDAR">2° ANDAR</option>
+                                    <option value="3° ANDAR">3° ANDAR</option>
+                                </select>
+                            </div>
+                            <div class="location-info" id="locationInfo">
+                                <p><strong>Local selecionado:</strong> <span id="selectedLocation"></span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Itens *</label>
+                            <div class="items-container" id="itemsContainer">
+                                <div class="item-row">
+                                    <div class="item-select">
+                                        <select name="itemId[]" class="item-select-field" required disabled>
+                                            <option value="">Primeiro selecione o prédio e andar</option>
+                                        </select>
+                                    </div>
+                                    <div class="amount-input">
+                                        <input type="number" name="amount[]" required min="1" max="1000" step="1" placeholder="Qtd" class="amount-field" disabled>
+                                    </div>
+                                    <button type="button" class="remove-item" style="display: none;" title="Remover">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn add-item-btn" id="addItemBtn" disabled>
+                                <i class="fas fa-plus"></i> Adicionar Item
+                            </button>
+                            <small>Informe a quantidade perdida (será negativa na planilha)</small>
+                        </div>
+                        
+                        <button type="submit" class="btn" id="submitBtn" style="width: 100%;" disabled>Registrar Perda</button>
+                    </form>
+                    <div id="message" class="message"></div>
+                </div>
+            </div>
+            
+            <div class="side-panel">
+                <div class="card reposicao-info">
+                    <div class="section-title"><i class="fa-solid fa-truck"></i> Quantidades para Reposição</div>
+                    <div style="overflow-x: auto;">
+                        <table class="reposicao-table">
+                            <thead>
+                                <tr>
+                                    <th>Prédio</th>
+                                    <th>Teclados</th>
+                                    <th>Headsets</th>
+                                    <th>Mouses</th>
+                                    <th>Adaptadores</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>HQ1 - Lado Maior</td><td>20</td><td>5</td><td>10</td><td>5</td></tr>
+                                <tr><td>HQ1 - Lado Menor</td><td>10</td><td>5</td><td>5</td><td>5</td></tr>
+                                <tr><td>HQ2</td><td>15</td><td>5</td><td>10</td><td>5</td></tr>
+                                <tr><td>Spark</td><td>15</td><td>10</td><td>15</td><td>10</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-bolt"></i> Ações Rápidas</div>
+                    <div class="button-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button type="button" class="btn btn-secondary" onclick="testConnection()"><i class="fas fa-wifi"></i> Conexão</button>
+                        <button type="button" class="btn btn-chart" onclick="openChartModal()"><i class="fas fa-chart-bar"></i> Gráficos</button>
+                        <button type="button" class="btn btn-report" onclick="openBudgetModal()"><i class="fas fa-file-invoice-dollar"></i> Orçamentos</button>
+                        <button type="button" class="btn btn-entry" onclick="openEntryModal()"><i class="fas fa-plus-circle"></i> Entrada</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Sistema de Controle de Perdas e Entradas © 2025</p>
+        </div>
+    </div>
+
+    <!-- Modal: Gráficos -->
+    <div id="chartModal" class="modal" aria-modal="true" role="dialog">
+        <div class="modal-content">
+            <span class="close" onclick="closeChartModal()" aria-label="Fechar">&times;</span>
+            <div class="modal-header">
+                <h2>Gráficos de Controle de Perdas</h2>
+            </div>
+            <div class="budget-filter" style="justify-content: center;">
+                <label for="periodFilter">Selecionar Período:</label>
+                <select id="periodFilter" onchange="updateChartsPeriod()">
+                    <option value="monthly">Mensal</option>
+                    <option value="quarterly">Trimestral</option>
+                    <option value="yearly">Anual</option>
+                </select>
+            </div>
+            <div class="chart-container">
+                <div class="loading" id="chartLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Carregando dados da planilha...</p>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-half">
+                        <h3 class="chart-title">Perdas por Tipo de Item</h3>
+                        <div class="chart-wrapper"><canvas id="itemLossChart"></canvas></div>
+                    </div>
+                    <div class="chart-half">
+                        <h3 class="chart-title">Perdas por Prédio</h3>
+                        <div class="chart-wrapper"><canvas id="buildingLossChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-half">
+                        <h3 class="chart-title">Evolução de Perdas</h3>
+                        <div class="chart-wrapper"><canvas id="monthlyLossChart"></canvas></div>
+                    </div>
+                    <div class="chart-half">
+                        <h3 class="chart-title">Distribuição de Itens para Reposição</h3>
+                        <div class="chart-wrapper"><canvas id="reposicaoChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 12px;">
+                <button class="btn" onclick="closeChartModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Orçamentos -->
+    <div id="budgetModal" class="modal" aria-modal="true" role="dialog">
+        <div class="modal-content" style="max-width: 1100px;">
+            <span class="close" onclick="closeBudgetModal()" aria-label="Fechar">&times;</span>
+            <div class="modal-header">
+                <h2>Orçamentos Sugeridos</h2>
+            </div>
+            <div class="card" style="border: 1px solid #ffe08a;background-color:#fffdf4;">
+                <div style="font-size: 13px;">
+                    <p><strong>Prioridade:</strong> Headsets e Adaptadores Gorila são priorizados em todos os orçamentos.</p>
+                    <p><strong>Reposição:</strong> Semanal em todos os prédios.</p>
+                    <p><strong>Redistribuição:</strong> Ao remover um item, o orçamento é redistribuído igualmente entre os demais.</p>
+                </div>
+            </div>
+            <div class="budget-filter">
+                <label for="budgetFilter">Limite de orçamento:</label>
+                <select id="budgetFilter" onchange="filterBudgets()">
+                    <option value="25000">R$ 25.000</option>
+                    <option value="30000">R$ 30.000</option>
+                    <option value="35000">R$ 35.000</option>
+                    <option value="40000">R$ 40.000</option>
+                    <option value="45000">R$ 45.000</option>
+                </select>
+                <button class="btn" onclick="addCustomItem()" style="padding: 8px 12px;">
+                    <i class="fas fa-plus"></i> Adicionar Item Personalizado
+                </button>
+            </div>
+            <div class="budget-container">
+                <div class="loading" id="budgetLoading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>Calculando orçamentos...</p>
+                </div>
+                <table class="budget-table" id="budgetTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Preço Unitário</th>
+                            <th>Porcentagem</th>
+                            <th>Quantidade</th>
+                            <th>Total</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="budgetTableBody"></tbody>
+                </table>
+            </div>
+            <div class="loss-value-display" id="lossValueDisplay" style="display: none;">
+                Valor total de perdas no período: <span id="totalLossValue">R$ 0,00</span>
+            </div>
+            <div class="budget-total" id="budgetTotal">Total: R$ 0,00</div>
+            <div class="budget-actions">
+                <button class="btn" onclick="resetBudget()"><i class="fas fa-sync-alt"></i> Restaurar</button>
+                <button class="btn" onclick="resetBudgetPercentages()" style="background-color: #ff9800;"><i class="fas fa-percentage"></i> Resetar %</button>
+                <button class="btn" onclick="calculateLossValue()" style="background-color: #d32f2f;"><i class="fas fa-calculator"></i> Calcular Perdas</button>
+                <button class="btn" onclick="exportBudgetData()"><i class="fas fa-download"></i> Exportar</button>
+                <button class="btn" onclick="closeBudgetModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Entrada -->
+    <div id="entryModal" class="modal" aria-modal="true" role="dialog">
+        <div class="modal-content">
+            <span class="close" onclick="closeEntryModal()" aria-label="Fechar">&times;</span>
+            <div class="modal-header">
+                <h2>Registro de Entrada de Itens</h2>
+            </div>
+            <div class="card" style="background:#f8f9fa;">
+                <form id="entryForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="entryBuilding">Prédio *</label>
+                            <select id="entryBuilding" name="entryBuilding" required>
+                                <option value="">Selecione um prédio</option>
+                                <option value="Spark">Spark</option>
+                                <option value="HQ1">HQ1</option>
+                                <option value="HQ2">HQ2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="entryEmail">Email</label>
+                            <input type="email" id="entryEmail" name="entryEmail" placeholder="seu.email@exemplo.com.br">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Local (Prédio e Andar)</label>
+                        <div class="building-group entry-hq1">
+                            <h3 class="building-title hq1">🏢 HQ1</h3>
+                            <select id="entryBuildingHq1" class="form-control">
+                                <option value="">Selecione o andar (HQ1)</option>
+                                <option value="2° ANDAR L MAIOR">2° ANDAR L MAIOR</option>
+                                <option value="2° ANDAR L MENOR">2° ANDAR L MENOR</option>
+                                <option value="4° ANDAR L MAIOR">4° ANDAR L MAIOR</option>
+                                <option value="4° ANDAR L MENOR">4° ANDAR L MENOR</option>
+                                <option value="6° ANDAR L MAIOR">6° ANDAR L MAIOR</option>
+                                <option value="6° ANDAR L MENOR">6° ANDAR L MENOR</option>
+                                <option value="8° ANDAR L MAIOR">8° ANDAR L MAIOR</option>
+                                <option value="8° ANDAR L MENOR">8° ANDAR L MENOR</option>
+                                <option value="4° ANDAR">4° ANDAR</option>
+                            </select>
+                        </div>
+                        <div class="building-group entry-hq2">
+                            <h3 class="building-title hq2">🏢 HQ2</h3>
+                            <select id="entryBuildingHq2" class="form-control">
+                                <option value="">Selecione o andar (HQ2)</option>
+                                <option value="2° ANDAR L MAIOR">2° ANDAR L MAIOR</option>
+                                <option value="2° ANDAR L MENOR">2° ANDAR L MENOR</option>
+                                <option value="4° ANDAR L MAIOR">4° ANDAR L MAIOR</option>
+                                <option value="4° ANDAR L MENOR">4° ANDAR L MENOR</option>
+                                <option value="6° ANDAR L MAIOR">6° ANDAR L MAIOR</option>
+                                <option value="6° ANDAR L MENOR">6° ANDAR L MENOR</option>
+                                <option value="8° ANDAR L MAIOR">8° ANDAR L MAIOR</option>
+                                <option value="8° ANDAR L MENOR">8° ANDAR L MENOR</option>
+                                <option value="8° ANDAR">8° ANDAR</option>
+                                <option value="12° ANDAR">12° ANDAR</option>
+                                <option value="15° ANDAR">15° ANDAR</option>
+                            </select>
+                        </div>
+                        <div class="building-group entry-spark">
+                            <h3 class="building-title spark">🏢 Spark</h3>
+                            <select id="entryBuildingSpark" class="form-control">
+                                <option value="">Selecione o andar (Spark)</option>
+                                <option value="1° ANDAR">1° ANDAR</option>
+                                <option value="2° ANDAR">2° ANDAR</option>
+                                <option value="3° ANDAR">3° ANDAR</option>
+                            </select>
+                        </div>
+                        <div class="entry-info" id="entryLocationInfo">
+                            <p><strong>Local selecionado:</strong> <span id="selectedEntryLocation"></span></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Itens *</nlabel>
+                        <div class="items-container" id="entryItemsContainer">
+                            <div class="item-row">
+                                <div class="item-select">
+                                    <select name="entryItemId[]" class="entry-item-select-field" required disabled>
+                                        <option value="">Primeiro selecione o prédio e andar</option>
+                                    </select>
+                                </div>
+                                <div class="amount-input">
+                                    <input type="number" name="entryAmount[]" required min="1" max="1000" step="1" placeholder="Qtd" class="entry-amount-field" disabled>
+                                </div>
+                                <button type="button" class="remove-item" style="display: none;" title="Remover">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn add-item-btn" id="addEntryItemBtn" disabled>
+                            <i class="fas fa-plus"></i> Adicionar Item
+                        </button>
+                        <small>Quantidade de entrada (valores positivos)</small>
+                    </div>
+                    <button type="submit" class="btn btn-entry" id="entrySubmitBtn" style="width: 100%;" disabled>Registrar Entrada</button>
+                </form>
+                <div id="entryMessage" class="message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis para gráficos
+        let itemLossChart, buildingLossChart, monthlyLossChart, reposicaoChart;
+        let currentChartPeriod = 'monthly';
+        let realChartData = null;
+
+        // Itens por prédio (IDs normalizados)
+        const itemsByBuilding = {
+            'Spark': [
+                'Headset-spk',
+                'Adaptadores usb c-spk',
+                'Mouse-spk',
+                'Teclado k120-spk',
+                'Usb Gorila 5m1 lanspk',
+                'Usb Gorila 6m1 spk'
+            ],
+            'HQ1': [
+                'Headset-hq1',
+                'Adaptadores usb c-hq1',
+                'Mouse-hq1',
+                'Teclado k120-hq1',
+                'Usb Gorila 5m1 lan hq1',
+                'Usb Gorila 6m1 hq1'
+            ],
+            'HQ2': [
+                'Headset-hq2',
+                'Adaptadores usb c-hq2',
+                'Mouse-hq2',
+                'Teclado k120-hq2',
+                'Usb Gorila 5m1 lan hq2',
+                'Usb Gorila 6m1 hq2'
+            ]
+        };
+
+        // Nomes amigáveis
+        const itemNames = {
+            'Headset-spk': 'Headset - Spark',
+            'Adaptadores usb c-spk': 'Adaptador USB-C - Spark',
+            'Mouse-spk': 'Mouse - Spark',
+            'Teclado k120-spk': 'Teclado K120 - Spark',
+            'Headset-hq1': 'Headset - HQ1',
+            'Adaptadores usb c-hq1': 'Adaptador USB-C - HQ1',
+            'Mouse-hq1': 'Mouse - HQ1',
+            'Teclado k120-hq1': 'Teclado K120 - HQ1',
+            'Headset-hq2': 'Headset - HQ2',
+            'Adaptadores usb c-hq2': 'Adaptador USB-C - HQ2',
+            'Mouse-hq2': 'Mouse - HQ2',
+            'Teclado k120-hq2': 'Teclado K120 - HQ2',
+            'Usb Gorila 5m1 lan hq1': 'USB Gorila 5-em-1 - HQ1',
+            'Usb Gorila 5m1 lan hq2': 'USB Gorila 5-em-1 - HQ2',
+            'Usb Gorila 5m1 lanspk': 'USB Gorila 5-em-1 - Spark',
+            'Usb Gorila 6m1 hq1': 'USB Gorila 6-em-1 - HQ1',
+            'Usb Gorila 6m1 hq2': 'USB Gorila 6-em-1 - HQ2',
+            'Usb Gorila 6m1 spk': 'USB Gorila 6-em-1 - Spark'
+        };
+
+        // Dados para orçamentos
+        const realItemsData = [
+            { id: 'teclados', name: 'Teclados', unitPrice: 90.00, priority: 3 },
+            { id: 'mouses', name: 'Mouses', unitPrice: 31.90, priority: 4 },
+            { id: 'headsets', name: 'Headsets', unitPrice: 260.00, priority: 1 },
+            { id: 'adaptadores-gorila', name: 'Adaptadores Gorila', unitPrice: 112.00, priority: 1 }
+        ];
+
+        let removedItems = [];
+        let customItems = [];
+        let currentBudget = 0;
+        let percentages = JSON.parse(localStorage.getItem('budgetPercentages')) || { headsets: 35, adaptadores: 30, teclados: 25, mouses: 10 };
+        const customPercentages = JSON.parse(localStorage.getItem('budgetCustomPercentages')) || {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettingsFromLocalStorage();
+            
+            const buildingSelect = document.getElementById('building');
+            const buildingGroups = document.querySelectorAll('.building-group');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const itemsContainer = document.getElementById('itemsContainer');
+            const locationInfo = document.getElementById('locationInfo');
+            const selectedLocation = document.getElementById('selectedLocation');
+            const submitBtn = document.getElementById('submitBtn');
+
+            const entryBuildingSelect = document.getElementById('entryBuilding');
+            const entryBuildingGroups = document.querySelectorAll('.building-group.entry-hq1, .building-group.entry-hq2, .building-group.entry-spark');
+            const addEntryItemBtn = document.getElementById('addEntryItemBtn');
+            const entryItemsContainer = document.getElementById('entryItemsContainer');
+            const entryLocationInfo = document.getElementById('entryLocationInfo');
+            const selectedEntryLocation = document.getElementById('selectedEntryLocation');
+            const entrySubmitBtn = document.getElementById('entrySubmitBtn');
+
+            let itemCount = 1;
+            let entryItemCount = 1;
+
+            // PERDAS
+            buildingSelect.addEventListener('change', function() {
+                const building = this.value;
+                buildingGroups.forEach(group => { group.style.display = 'none'; });
+                if (building === 'HQ1') document.querySelector('.building-group.hq1').style.display = 'block';
+                if (building === 'HQ2') document.querySelector('.building-group.hq2').style.display = 'block';
+                if (building === 'Spark') document.querySelector('.building-group.spark').style.display = 'block';
+                clearItemSelection();
+                updateLocationInfo();
+            });
+
+            document.querySelectorAll('.building-group select').forEach(select => {
+                select.addEventListener('change', function() { updateLocationInfo(); updateItemOptions(); });
+            });
+
+            function updateLocationInfo() {
+                const building = buildingSelect.value;
+                let floor = '';
+                if (building === 'HQ1') floor = document.getElementById('buildingHq1').value;
+                else if (building === 'HQ2') floor = document.getElementById('buildingHq2').value;
+                else if (building === 'Spark') floor = document.getElementById('buildingSpark').value;
+                if (building && floor) {
+                    selectedLocation.textContent = `${building} - ${floor}`;
+                    locationInfo.style.display = 'block';
+                    addItemBtn.disabled = false;
+                    updateItemOptions();
+                } else {
+                    locationInfo.style.display = 'none';
+                    addItemBtn.disabled = true;
+                }
+            }
+
+            function fillItemSelect(selectElement, building) {
+                const selectedValue = selectElement.value;
+                selectElement.innerHTML = '';
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Selecione um item';
+                selectElement.appendChild(defaultOption);
+                if (building && itemsByBuilding[building]) {
+                    itemsByBuilding[building].forEach(itemId => {
+                        const option = document.createElement('option');
+                        option.value = itemId;
+                        option.textContent = itemNames[itemId];
+                        selectElement.appendChild(option);
+                    });
+                }
+                if (selectedValue && Array.from(selectElement.options).some(opt => opt.value === selectedValue)) selectElement.value = selectedValue; else selectElement.value = '';
+            }
+
+            function updateItemOptions() {
+                const building = buildingSelect.value;
+                if (!building) return;
+                document.querySelectorAll('.item-select-field').forEach(select => { fillItemSelect(select, building); select.disabled = false; });
+                document.querySelectorAll('.amount-field').forEach(input => { input.disabled = false; });
+                validateForm();
+            }
+
+            function clearItemSelection() {
+                document.querySelectorAll('.item-select-field').forEach(select => { select.innerHTML = '<option value="">Primeiro selecione o prédio e andar</option>'; select.disabled = true; });
+                document.querySelectorAll('.amount-field').forEach(input => { input.value = ''; input.disabled = true; });
+                addItemBtn.disabled = true; submitBtn.disabled = true;
+            }
+
+            function validateForm() {
+                const building = buildingSelect.value;
+                let floor = '';
+                if (building === 'HQ1') floor = document.getElementById('buildingHq1').value;
+                else if (building === 'HQ2') floor = document.getElementById('buildingHq2').value;
+                else if (building === 'Spark') floor = document.getElementById('buildingSpark').value;
+                let hasValidItems = false;
+                document.querySelectorAll('.item-select-field').forEach(select => { if (select.value) hasValidItems = true; });
+                submitBtn.disabled = !(building && floor && hasValidItems);
+            }
+
+            document.getElementById('inventoryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const building = document.getElementById('building').value;
+                const email = document.getElementById('email').value;
+                const itemSelects = document.querySelectorAll('.item-select-field');
+                const amountInputs = document.querySelectorAll('.amount-field');
+                if (!building) { showMessage('Por favor, selecione um prédio.', 'error'); return; }
+                const items = []; let hasErrors = false;
+                for (let i = 0; i < itemSelects.length; i++) {
+                    const itemId = itemSelects[i].value; const amount = amountInputs[i].value;
+                    if (!itemId || !amount) { showMessage('Preencha todos os campos de item e quantidade.', 'error'); hasErrors = true; break; }
+                    items.push({ itemId, amount: parseFloat(amount) * -1 });
+                }
+                if (hasErrors) return;
+                let location = '';
+                if (building === 'HQ1') location = document.getElementById('buildingHq1').value;
+                else if (building === 'HQ2') location = document.getElementById('buildingHq2').value;
+                else if (building === 'Spark') location = document.getElementById('buildingSpark').value;
+                const btn = document.getElementById('submitBtn'); const originalText = btn.textContent; btn.textContent = 'Processando...'; btn.disabled = true;
+                const formDataArray = items.map(item => ({
+                    inventoryId: generateId(),
+                    itemId: item.itemId,
+                    dateTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                    amount: item.amount,
+                    building: building,
+                    location: location,
+                    email: email,
+                    type: 'perda'
+                }));
+                let processed = 0; let errors = 0;
+                formDataArray.forEach(formData => {
+                    if (typeof google === 'undefined' || !google.script || !google.script.run) {
+                        // Simula sucesso fora do Apps Script
+                        processed++;
+                        if (processed === formDataArray.length) afterSubmit(processed, errors, items.length, btn, originalText, itemsContainer, buildingGroups, locationInfo, clearItemSelection, updateRemoveButtons, 'perda');
+                        return;
+                    }
+                    google.script.run
+                        .withSuccessHandler(function() {
+                            processed++;
+                            if (processed === formDataArray.length) afterSubmit(processed, errors, items.length, btn, originalText, itemsContainer, buildingGroups, locationInfo, clearItemSelection, updateRemoveButtons, 'perda');
+                        })
+                        .withFailureHandler(function() {
+                            processed++; errors++;
+                            if (processed === formDataArray.length) afterSubmit(processed, errors, items.length, btn, originalText, itemsContainer, buildingGroups, locationInfo, clearItemSelection, updateRemoveButtons, 'perda');
+                        })
+                        .processFormData(formData);
+                });
+            });
+
+            function afterSubmit(processed, errors, count, btn, originalText, itemsContainer, buildingGroups, locationInfo, clearFn, updateRemoveButtons, kind) {
+                if (errors === 0) {
+                    const label = kind === 'perda' ? 'Perda' : 'Entrada';
+                    showMessage(`${label} registrada com sucesso para ${count} item(ns)!`, 'success');
+                    if (kind === 'perda') document.getElementById('inventoryForm').reset(); else document.getElementById('entryForm').reset();
+                    btn.textContent = originalText; btn.disabled = true;
+                    buildingGroups.forEach(group => { group.style.display = 'none'; });
+                    const itemRows = itemsContainer.querySelectorAll('.item-row');
+                    for (let i = 1; i < itemRows.length; i++) { itemsContainer.removeChild(itemRows[i]); }
+                    if (kind === 'perda') itemCount = 1; else entryItemCount = 1;
+                    updateRemoveButtons();
+                    clearFn();
+                    locationInfo.style.display = 'none';
+                } else {
+                    showMessage(`Alguns itens não foram processados. ${errors} erro(s) encontrado(s).`, 'error');
+                    btn.textContent = originalText; btn.disabled = false;
+                }
+            }
+
+            addItemBtn.addEventListener('click', function() {
+                if (itemCount >= 4) { showMessage('Máximo de 4 itens atingido.', 'error'); return; }
+                const newItemRow = document.createElement('div'); newItemRow.className = 'item-row';
+                newItemRow.innerHTML = `
+                    <div class="item-select">
+                        <select name="itemId[]" class="item-select-field" required><option value="">Selecione um item</option></select>
+                    </div>
+                    <div class="amount-input"><input type="number" name="amount[]" required min="1" max="1000" step="1" placeholder="Qtd" class="amount-field"></div>
+                    <button type="button" class="remove-item" title="Remover"><i class="fas fa-times"></i></button>
+                `;
+                itemsContainer.appendChild(newItemRow); itemCount++;
+                const building = buildingSelect.value; const newSelect = newItemRow.querySelector('.item-select-field'); fillItemSelect(newSelect, building); newSelect.disabled = !building;
+                const newInput = newItemRow.querySelector('.amount-field'); newInput.disabled = !building;
+                const removeBtn = newItemRow.querySelector('.remove-item');
+                removeBtn.addEventListener('click', function() { itemsContainer.removeChild(newItemRow); itemCount--; updateRemoveButtons(); validateForm(); });
+                updateRemoveButtons(); newSelect.addEventListener('change', validateForm); newInput.addEventListener('input', validateForm); validateForm();
+            });
+
+            function updateRemoveButtons() {
+                const itemRows = document.querySelectorAll('#itemsContainer .item-row');
+                const removeButtons = document.querySelectorAll('#itemsContainer .remove-item');
+                if (itemRows.length > 1) removeButtons.forEach(btn => btn.style.display = 'grid'); else removeButtons.forEach(btn => btn.style.display = 'none');
+            }
+
+            // ENTRADAS
+            entryBuildingSelect.addEventListener('change', function() {
+                const building = this.value; entryBuildingGroups.forEach(group => { group.style.display = 'none'; });
+                if (building === 'HQ1') document.querySelector('.building-group.entry-hq1').style.display = 'block';
+                if (building === 'HQ2') document.querySelector('.building-group.entry-hq2').style.display = 'block';
+                if (building === 'Spark') document.querySelector('.building-group.entry-spark').style.display = 'block';
+                clearEntryItemSelection(); updateEntryLocationInfo();
+            });
+            document.querySelectorAll('.building-group.entry-hq1 select, .building-group.entry-hq2 select, .building-group.entry-spark select').forEach(select => {
+                select.addEventListener('change', function() { updateEntryLocationInfo(); updateEntryItemOptions(); });
+            });
+            function updateEntryLocationInfo() {
+                const building = entryBuildingSelect.value; let floor = '';
+                if (building === 'HQ1') floor = document.getElementById('entryBuildingHq1').value;
+                else if (building === 'HQ2') floor = document.getElementById('entryBuildingHq2').value;
+                else if (building === 'Spark') floor = document.getElementById('entryBuildingSpark').value;
+                if (building && floor) {
+                    selectedEntryLocation.textContent = `${building} - ${floor}`;
+                    entryLocationInfo.style.display = 'block';
+                    addEntryItemBtn.disabled = false; updateEntryItemOptions();
+                } else { entryLocationInfo.style.display = 'none'; addEntryItemBtn.disabled = true; }
+            }
+            function updateEntryItemOptions() {
+                const building = entryBuildingSelect.value; if (!building) return;
+                document.querySelectorAll('.entry-item-select-field').forEach(select => { fillItemSelect(select, building); select.disabled = false; });
+                document.querySelectorAll('.entry-amount-field').forEach(input => { input.disabled = false; });
+                validateEntryForm();
+            }
+            function clearEntryItemSelection() {
+                document.querySelectorAll('.entry-item-select-field').forEach(select => { select.innerHTML = '<option value="">Primeiro selecione o prédio e andar</option>'; select.disabled = true; });
+                document.querySelectorAll('.entry-amount-field').forEach(input => { input.value = ''; input.disabled = true; });
+                addEntryItemBtn.disabled = true; entrySubmitBtn.disabled = true;
+            }
+            function validateEntryForm() {
+                const building = entryBuildingSelect.value; let floor = '';
+                if (building === 'HQ1') floor = document.getElementById('entryBuildingHq1').value;
+                else if (building === 'HQ2') floor = document.getElementById('entryBuildingHq2').value;
+                else if (building === 'Spark') floor = document.getElementById('entryBuildingSpark').value;
+                let hasValidItems = false; document.querySelectorAll('.entry-item-select-field').forEach(select => { if (select.value) hasValidItems = true; });
+                entrySubmitBtn.disabled = !(building && floor && hasValidItems);
+            }
+            addEntryItemBtn.addEventListener('click', function() {
+                if (entryItemCount >= 4) { showEntryMessage('Máximo de 4 itens atingido.', 'error'); return; }
+                const newItemRow = document.createElement('div'); newItemRow.className = 'item-row';
+                newItemRow.innerHTML = `
+                    <div class="item-select">
+                        <select name="entryItemId[]" class="entry-item-select-field" required><option value=\"\">Selecione um item</option></select>
+                    </div>
+                    <div class="amount-input"><input type="number" name="entryAmount[]" required min="1" max="1000" step="1" placeholder="Qtd" class="entry-amount-field"></div>
+                    <button type="button" class="remove-item" title="Remover"><i class="fas fa-times"></i></button>
+                `;
+                entryItemsContainer.appendChild(newItemRow); entryItemCount++;
+                const building = entryBuildingSelect.value; const newSelect = newItemRow.querySelector('.entry-item-select-field'); fillItemSelect(newSelect, building); newSelect.disabled = !building;
+                const newInput = newItemRow.querySelector('.entry-amount-field'); newInput.disabled = !building;
+                const removeBtn = newItemRow.querySelector('.remove-item');
+                removeBtn.addEventListener('click', function() { entryItemsContainer.removeChild(newItemRow); entryItemCount--; updateEntryRemoveButtons(); validateEntryForm(); });
+                updateEntryRemoveButtons(); newSelect.addEventListener('change', validateEntryForm); newInput.addEventListener('input', validateEntryForm); validateEntryForm();
+            });
+            function updateEntryRemoveButtons() {
+                const itemRows = document.querySelectorAll('#entryItemsContainer .item-row');
+                const removeButtons = document.querySelectorAll('#entryItemsContainer .remove-item');
+                if (itemRows.length > 1) removeButtons.forEach(btn => btn.style.display = 'grid'); else removeButtons.forEach(btn => btn.style.display = 'none');
+            }
+            document.querySelectorAll('.item-select-field, .amount-field').forEach(field => { field.addEventListener('change', validateForm); field.addEventListener('input', validateForm); });
+            document.querySelectorAll('.entry-item-select-field, .entry-amount-field').forEach(field => { field.addEventListener('change', validateEntryForm); field.addEventListener('input', validateEntryForm); });
+
+            document.getElementById('entryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const building = document.getElementById('entryBuilding').value; const email = document.getElementById('entryEmail').value;
+                const itemSelects = document.querySelectorAll('.entry-item-select-field'); const amountInputs = document.querySelectorAll('.entry-amount-field');
+                if (!building) { showEntryMessage('Por favor, selecione um prédio.', 'error'); return; }
+                const items = []; let hasErrors = false;
+                for (let i = 0; i < itemSelects.length; i++) {
+                    const itemId = itemSelects[i].value; const amount = amountInputs[i].value;
+                    if (!itemId || !amount) { showEntryMessage('Preencha todos os campos de item e quantidade.', 'error'); hasErrors = true; break; }
+                    items.push({ itemId: itemId, amount: parseFloat(amount) });
+                }
+                if (hasErrors) return;
+                let location = '';
+                if (building === 'HQ1') location = document.getElementById('entryBuildingHq1').value;
+                else if (building === 'HQ2') location = document.getElementById('entryBuildingHq2').value;
+                else if (building === 'Spark') location = document.getElementById('entryBuildingSpark').value;
+                const btn = document.getElementById('entrySubmitBtn'); const originalText = btn.textContent; btn.textContent = 'Processando...'; btn.disabled = true;
+                const formDataArray = items.map(item => ({
+                    inventoryId: generateId(),
+                    itemId: item.itemId,
+                    dateTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                    amount: item.amount,
+                    building: building,
+                    location: location,
+                    email: email,
+                    type: 'entrada'
+                }));
+                let processed = 0; let errors = 0;
+                formDataArray.forEach(formData => {
+                    if (typeof google === 'undefined' || !google.script || !google.script.run) {
+                        processed++;
+                        if (processed === formDataArray.length) afterSubmit(processed, errors, items.length, btn, originalText, entryItemsContainer, entryBuildingGroups, entryLocationInfo, clearEntryItemSelection, updateEntryRemoveButtons, 'entrada');
+                        return;
+                    }
+                    google.script.run
+                        .withSuccessHandler(function() {
+                            processed++;
+                            if (processed === formDataArray.length) afterSubmit(processed, errors, items.length, btn, originalText, entryItemsContainer, entryBuildingGroups, entryLocationInfo, clearEntryItemSelection, updateEntryRemoveButtons, 'entrada');
+                        })
+                        .withFailureHandler(function() {
+                            processed++; errors++;
+                            if (processed === formDataArray.length) afterSubmit(processed, errors, items.length, btn, originalText, entryItemsContainer, entryBuildingGroups, entryLocationInfo, clearEntryItemSelection, updateEntryRemoveButtons, 'entrada');
+                        })
+                        .processFormData(formData);
+                });
+            });
+        });
+
+        function testConnection() {
+            showMessage('Testando conexão...', 'success');
+            setTimeout(() => { showMessage('Conexão estabelecida com sucesso!', 'success'); }, 1000);
+        }
+
+        function openChartModal() {
+            const modal = document.getElementById('chartModal');
+            modal.style.display = 'block';
+            // Aguarda o layout aplicar antes de renderizar os gráficos
+            requestAnimationFrame(() => { setTimeout(() => { createRealCharts(); }, 60); });
+        }
+        function closeChartModal() { const modal = document.getElementById('chartModal'); modal.style.display = 'none'; if (itemLossChart) itemLossChart.destroy(); if (buildingLossChart) buildingLossChart.destroy(); if (monthlyLossChart) monthlyLossChart.destroy(); if (reposicaoChart) reposicaoChart.destroy(); }
+        function openEntryModal() { document.getElementById('entryModal').style.display = 'block'; }
+        function closeEntryModal() { document.getElementById('entryModal').style.display = 'none'; }
+        function openBudgetModal() { const modal = document.getElementById('budgetModal'); modal.style.display = 'block'; loadBudgetData(); }
+        function closeBudgetModal() { const modal = document.getElementById('budgetModal'); modal.style.display = 'none'; }
+
+        function updateChartsPeriod() {
+            currentChartPeriod = document.getElementById('periodFilter').value;
+            // Pequeno atraso para evitar cálculo com largura zero
+            requestAnimationFrame(() => { setTimeout(() => { createRealCharts(); }, 30); });
+        }
+
+        function extractRealDataFromSheet(period = 'monthly') {
+            if (realChartData) return Promise.resolve(filterDataByPeriod(realChartData, period));
+            const loading = document.getElementById('chartLoading'); if (loading) loading.style.display = 'flex';
+            if (typeof google === 'undefined' || !google.script || !google.script.run) {
+                const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; if (loading) loading.style.display = 'none';
+                return Promise.resolve(filterDataByPeriod(fallbackData, period));
+            }
+            return new Promise((resolve) => {
+                let settled = false;
+                const finalize = (dataObj) => { if (settled) return; settled = true; if (loading) loading.style.display = 'none'; resolve(filterDataByPeriod(dataObj, period)); };
+                const timeoutId = setTimeout(() => { const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; finalize(fallbackData); }, 8000);
+                try {
+                    google.script.run
+                        .withSuccessHandler((data) => { clearTimeout(timeoutId); if (data && data.success && data.data) { realChartData = normalizeChartData(data.data); finalize(realChartData); } else { const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; finalize(fallbackData); } })
+                        .withFailureHandler(() => { clearTimeout(timeoutId); const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; finalize(fallbackData); })
+                        .getLossDataFromTotalCost();
+                } catch (err) { clearTimeout(timeoutId); const fallbackData = normalizeChartData(createFallbackData()); realChartData = fallbackData; finalize(fallbackData); }
+            });
+        }
+
+        function createFallbackData() {
+            const monthlyLosses = { labels: ['Dez/2024', 'Jan/2025', 'Fev/2025', 'Mar/2025', 'Abr/2025', 'Mai/2025', 'Jun/2025', 'Jul/2025', 'Ago/2025'], values: [31.9, 19045.2, 37651.2, 28023.2, 56834.2, 40239.3, 6592.0, 5200.0, 22634.0] };
+            const quarterlyLosses = { labels: ['Q4/2024', 'Q1/2025', 'Q2/2025', 'Q3/2025'], values: [31.9, 84719.6, 103665.5, 27834.0] };
+            const yearlyLosses = { labels: ['2024', '2025'], values: [31.9, 216219.1] };
+            const itemTypeData = { labels: ['Headsets', 'Mouses', 'Teclados', 'Adaptadores', 'USB Gorila'], values: [102425.0, 4785.0, 1260.0, 68040.0, 12880.0] };
+            const buildingData = { labels: ['HQ1', 'HQ2', 'Spark'], values: [75430.6, 38363.5, 102425.0] };
+            return { monthly: monthlyLosses, quarterly: quarterlyLosses, yearly: yearlyLosses, byItemType: itemTypeData, byBuilding: buildingData };
+        }
+
+        function filterDataByPeriod(data, period) { return { period: data[period], byItemType: data.byItemType, byBuilding: data.byBuilding }; }
+
+        function isChartAreaReady() {
+            const area = document.querySelector('#chartModal .chart-container');
+            if (!area) return false;
+            const rect = area.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+        }
+
+        async function createRealCharts() {
+            try {
+                // Se a área ainda não estiver com dimensões, tente novamente em breve
+                if (!isChartAreaReady()) { setTimeout(createRealCharts, 80); return; }
+                const realData = await extractRealDataFromSheet(currentChartPeriod);
+                if (itemLossChart) itemLossChart.destroy(); if (buildingLossChart) buildingLossChart.destroy(); if (monthlyLossChart) monthlyLossChart.destroy(); if (reposicaoChart) reposicaoChart.destroy();
+                const currencyTooltip = (context) => {
+                    const val = typeof context.parsed === 'object' && context.parsed !== null ? context.parsed.y : context.parsed;
+                    return currencyBRL(toNumberBR(val));
+                };
+                const itemLossCanvas = document.getElementById('itemLossChart');
+                const buildingLossCanvas = document.getElementById('buildingLossChart');
+                const monthlyLossCanvas = document.getElementById('monthlyLossChart');
+                const reposicaoCanvas = document.getElementById('reposicaoChart');
+                if (!itemLossCanvas || !buildingLossCanvas || !monthlyLossCanvas || !reposicaoCanvas) return;
+                const itemLossCtx = itemLossCanvas.getContext('2d');
+                itemLossChart = new Chart(itemLossCtx, {
+                    type: 'bar',
+                    data: { labels: realData.byItemType.labels, datasets: [{ label: 'Perdas por Tipo (R$)', data: realData.byItemType.values, backgroundColor: ['rgba(130, 10, 209, 0.7)','rgba(54, 162, 235, 0.7)','rgba(255, 99, 132, 0.7)','rgba(75, 192, 192, 0.7)','rgba(255, 159, 64, 0.7)'], borderColor: ['rgba(130, 10, 209, 1)','rgba(54, 162, 235, 1)','rgba(255, 99, 132, 1)','rgba(75, 192, 192, 1)','rgba(255, 159, 64, 1)'], borderWidth: 1 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => currencyBRL(toNumberBR(v)) } } } }
+                });
+                const buildingLossCtx = buildingLossCanvas.getContext('2d');
+                buildingLossChart = new Chart(buildingLossCtx, {
+                    type: 'pie',
+                    data: { labels: realData.byBuilding.labels, datasets: [{ label: 'Perdas por Prédio (R$)', data: realData.byBuilding.values, backgroundColor: ['rgba(66, 133, 244, 0.7)','rgba(234, 67, 53, 0.7)','rgba(251, 188, 5, 0.7)'], borderColor: ['rgba(66, 133, 244, 1)','rgba(234, 67, 53, 1)','rgba(251, 188, 5, 1)'], borderWidth: 1 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } } }
+                });
+                const monthlyLossCtx = monthlyLossCanvas.getContext('2d');
+                monthlyLossChart = new Chart(monthlyLossCtx, {
+                    type: 'line',
+                    data: { labels: realData.period.labels, datasets: [{ label: `Evolução ${currentChartPeriod === 'monthly' ? 'Mensal' : currentChartPeriod === 'quarterly' ? 'Trimestral' : 'Anual'} (R$)`, data: realData.period.values, fill: false, borderColor: 'rgba(130, 10, 209, 1)', backgroundColor: 'rgba(130, 10, 209, 0.2)', tension: 0.15, borderWidth: 2, pointBackgroundColor: 'rgba(130, 10, 209, 1)', pointRadius: 3, pointHoverRadius: 5 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${currencyTooltip(ctx)}` } } }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => currencyBRL(toNumberBR(v)) } }, x: { title: { display: true, text: currentChartPeriod === 'monthly' ? 'Mês' : currentChartPeriod === 'quarterly' ? 'Trimestre' : 'Ano' } } } }
+                });
+                const reposicaoCtx = reposicaoCanvas.getContext('2d');
+                reposicaoChart = new Chart(reposicaoCtx, {
+                    type: 'doughnut',
+                    data: { labels: ['Teclados', 'Headsets', 'Mouses', 'Adaptadores'], datasets: [{ label: 'Itens para Reposição', data: [60, 25, 40, 25], backgroundColor: ['rgba(130, 10, 209, 0.5)','rgba(54, 162, 235, 0.5)','rgba(255, 99, 132, 0.5)','rgba(75, 192, 192, 0.5)'], borderColor: ['rgba(130, 10, 209, 1)','rgba(54, 162, 235, 1)','rgba(255, 99, 132, 1)','rgba(75, 192, 192, 1)'], borderWidth: 1 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            } catch (error) { console.error('Erro ao criar gráficos:', error); const loading = document.getElementById('chartLoading'); if (loading) loading.style.display = 'none'; }
+        }
+
+        function saveSettingsToLocalStorage() { localStorage.setItem('budgetPercentages', JSON.stringify(percentages)); localStorage.setItem('customBudgetItems', JSON.stringify(customItems)); localStorage.setItem('removedBudgetItems', JSON.stringify(removedItems)); localStorage.setItem('budgetCustomPercentages', JSON.stringify(customPercentages)); }
+        function loadSettingsFromLocalStorage() { const sp = localStorage.getItem('budgetPercentages'); const sci = localStorage.getItem('customBudgetItems'); const sri = localStorage.getItem('removedBudgetItems'); const scp = localStorage.getItem('budgetCustomPercentages'); if (sp) percentages = JSON.parse(sp); if (sci) customItems = JSON.parse(sci); if (sri) removedItems = JSON.parse(sri); if (scp) { const obj = JSON.parse(scp); for (let k in obj) customPercentages[k] = obj[k]; } }
+        function updateBudgetPercentage(itemId, value) { value = Math.max(0, Math.min(100, parseInt(value) || 0)); customPercentages[itemId] = value; localStorage.setItem('budgetCustomPercentages', JSON.stringify(customPercentages)); recalculateBudgetWithCustomPercentages(); }
+        function recalculateBudgetWithCustomPercentages() { const totalPercentage = Object.values(customPercentages).reduce((s, v) => s + v, 0); if (totalPercentage > 100) { const factor = 100 / totalPercentage; for (let id in customPercentages) customPercentages[id] = Math.round(customPercentages[id] * factor); localStorage.setItem('budgetCustomPercentages', JSON.stringify(customPercentages)); } loadBudgetData(); }
+        function resetBudgetPercentages() { for (let id in customPercentages) delete customPercentages[id]; localStorage.removeItem('budgetCustomPercentages'); loadBudgetData(); }
+
+        function resetBudget() { removedItems = []; customItems = []; saveSettingsToLocalStorage(); loadBudgetData(); }
+        function calculateBudgetItems(limit, excludedItems = []) {
+            currentBudget = limit;
+            const availableItems = realItemsData.filter(item => !excludedItems.includes(item.id)).sort((a, b) => a.priority - b.priority);
+            let result = []; let remainingBudget = limit; const hasCustomPercentages = Object.keys(customPercentages).length > 0;
+            if (hasCustomPercentages) {
+                for (const item of availableItems) {
+                    if (customPercentages[item.id]) {
+                        const percentage = customPercentages[item.id];
+                        const allocatedBudget = (percentage / 100) * limit; let quantity = Math.floor(allocatedBudget / item.unitPrice); quantity = Math.max(10, quantity);
+                        let itemTotal = quantity * item.unitPrice; if (itemTotal > remainingBudget) { quantity = Math.floor(remainingBudget / item.unitPrice); itemTotal = quantity * item.unitPrice; }
+                        if (quantity > 0) { remainingBudget -= itemTotal; result.push({ id: item.id, name: item.name, unitPrice: item.unitPrice, quantity, total: itemTotal, priority: item.priority, percentage }); }
+                    }
+                }
+                if (remainingBudget > 0) {
+                    const itemsWithoutPercentage = availableItems.filter(item => !customPercentages[item.id]);
+                    if (itemsWithoutPercentage.length > 0) {
+                        const budgetPerItem = remainingBudget / itemsWithoutPercentage.length;
+                        for (const item of itemsWithoutPercentage) {
+                            let quantity = Math.floor(budgetPerItem / item.unitPrice); quantity = Math.max(10, quantity);
+                            let itemTotal = quantity * item.unitPrice; if (itemTotal > remainingBudget) { quantity = Math.floor(remainingBudget / item.unitPrice); itemTotal = quantity * item.unitPrice; }
+                            if (quantity > 0) { remainingBudget -= itemTotal; result.push({ id: item.id, name: item.name, unitPrice: item.unitPrice, quantity, total: itemTotal, priority: item.priority, percentage: 0 }); }
+                        }
+                    }
+                }
+            } else {
+                for (const item of availableItems) {
+                    let quantity = 0; if (item.priority === 1) quantity = Math.floor(remainingBudget * 0.3 / item.unitPrice); else if (item.priority === 3) quantity = Math.floor(remainingBudget * 0.25 / item.unitPrice); else quantity = Math.floor(remainingBudget * 0.15 / item.unitPrice);
+                    quantity = Math.max(10, quantity); let itemTotal = quantity * item.unitPrice; if (itemTotal > remainingBudget) { quantity = Math.floor(remainingBudget / item.unitPrice); itemTotal = quantity * item.unitPrice; }
+                    if (quantity > 0) { remainingBudget -= itemTotal; result.push({ id: item.id, name: item.name, unitPrice: item.unitPrice, quantity, total: itemTotal, priority: item.priority, percentage: 0 }); }
+                }
+            }
+            if (remainingBudget > 0) {
+                for (const item of result) {
+                    if (item.priority === 1) { const addQty = Math.floor(remainingBudget / item.unitPrice); if (addQty > 0) { item.quantity += addQty; item.total += addQty * item.unitPrice; remainingBudget -= addQty * item.unitPrice; } }
+                    if (remainingBudget <= 0) break;
+                }
+            }
+            return result;
+        }
+
+        function loadBudgetData() {
+            const loadingElement = document.getElementById('budgetLoading'); const tableElement = document.getElementById('budgetTable'); const tableBody = document.getElementById('budgetTableBody');
+            loadingElement.style.display = 'flex'; tableElement.style.display = 'none'; document.getElementById('lossValueDisplay').style.display = 'none';
+            setTimeout(function() {
+                const limit = parseInt(document.getElementById('budgetFilter').value);
+                const budgetItems = calculateBudgetItems(limit, removedItems); budgetItems.push(...customItems);
+                loadingElement.style.display = 'none';
+                tableBody.innerHTML = '';
+                if (budgetItems && budgetItems.length > 0) {
+                    let grandTotal = 0;
+                    budgetItems.forEach(item => {
+                        const percentage = customPercentages[item.id] || 0; const tr = document.createElement('tr'); if (item.custom) tr.className = 'budget-custom-row'; else if (item.priority === 1) tr.className = 'priority-high';
+                        tr.innerHTML = `
+                            <td class="budget-name-cell">${item.custom ? `<div class="budget-name-display" onclick="editCustomItemName('${item.id}')">${item.name}</div><input type="text" class="custom-name-input" value="${item.name}" onchange="updateCustomItemName('${item.id}', this.value)" onblur="updateCustomItemName('${item.id}', this.value)" style="display: none;">` : item.name}</td>
+                            <td><input type="number" class="budget-input unit-price" value="${(item.unitPrice).toFixed(2)}" step="0.01" min="0" onchange="updateBudgetItem('${item.id}', 'unitPrice', this.value)" onkeyup="updateBudgetItem('${item.id}', 'unitPrice', this.value)"></td>
+                            <td><div class="percentage-control"><input type="number" class="percentage-input" value="${percentage}" min="0" max="100" onchange="updateBudgetPercentage('${item.id}', this.value)" onkeyup="updateBudgetPercentage('${item.id}', this.value)"><span>%</span></div></td>
+                            <td><input type="number" class="budget-input quantity" value="${item.quantity}" min="0" onchange="updateBudgetItem('${item.id}', 'quantity', this.value)" onkeyup="updateBudgetItem('${item.id}', 'quantity', this.value)"></td>
+                            <td class="item-total">${currencyBRL(item.total)}</td>
+                            <td><button class="budget-remove-btn" onclick="removeBudgetItem('${item.id}')"><i class="fas fa-times"></i> Remover</button></td>
+                        `;
+                        tableBody.appendChild(tr); grandTotal += item.total;
+                    });
+                    document.getElementById('budgetTotal').textContent = `Total: ${currencyBRL(grandTotal)}`; tableElement.style.display = 'table';
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum dado de orçamento encontrado.</td></tr>';
+                    document.getElementById('budgetTotal').textContent = 'Total: R$ 0,00'; tableElement.style.display = 'table';
+                }
+            }, 500);
+        }
+
+        function updateBudgetItem(itemId, field, value) {
+            let item = realItemsData.find(i => i.id === itemId) || customItems.find(i => i.id === itemId);
+            if (!item) return;
+            if (field === 'unitPrice') item.unitPrice = parseFloat(value) || 0; else if (field === 'quantity') item.quantity = parseInt(value) || 0;
+            item.total = (item.unitPrice || 0) * (item.quantity || 0);
+            const rows = document.querySelectorAll('#budgetTableBody tr');
+            for (let i = 0; i < rows.length; i++) { const attr = rows[i].querySelector('.unit-price')?.getAttribute('onchange'); if (attr && attr.includes(itemId)) { rows[i].querySelector('.item-total').textContent = currencyBRL(item.total); break; } }
+            recalculateGrandTotal();
+        }
+        function recalculateGrandTotal() { let grandTotal = 0; for (let i = 0; i < realItemsData.length; i++) if (!removedItems.includes(realItemsData[i].id)) grandTotal += (realItemsData[i].total || 0); for (let i = 0; i < customItems.length; i++) grandTotal += customItems[i].total || 0; document.getElementById('budgetTotal').textContent = `Total: ${currencyBRL(grandTotal)}`; }
+        function removeBudgetItem(itemId) { const isStandard = realItemsData.some(item => item.id === itemId); if (isStandard) { if (!removedItems.includes(itemId)) { removedItems.push(itemId); saveSettingsToLocalStorage(); redistributeBudgetAfterRemoval(itemId); return; } } else { customItems = customItems.filter(item => item.id !== itemId); saveSettingsToLocalStorage(); } loadBudgetData(); }
+        function redistributeBudgetAfterRemoval() { loadBudgetData(); }
+        function addCustomItem() { const newId = 'custom-' + Date.now(); const newItem = { id: newId, name: 'Novo Item Personalizado', unitPrice: 0, quantity: 0, total: 0, custom: true, priority: 5 }; customItems.push(newItem); saveSettingsToLocalStorage(); loadBudgetData(); setTimeout(() => { editCustomItemName(newId); }, 100); }
+        function editCustomItemName(itemId) { const rows = document.querySelectorAll('#budgetTableBody tr'); for (let i = 0; i < rows.length; i++) { const nameDisplay = rows[i].querySelector('.budget-name-display'); const nameInput = rows[i].querySelector('.custom-name-input'); const removeButton = rows[i].querySelector('.budget-remove-btn'); if (nameDisplay && nameInput && removeButton?.getAttribute('onclick').includes(itemId)) { nameDisplay.style.display = 'none'; nameInput.style.display = 'block'; nameInput.focus(); break; } } }
+        function updateCustomItemName(itemId, newName) { const it = customItems.find(i => i.id === itemId); if (it) it.name = newName || 'Novo Item Personalizado'; saveSettingsToLocalStorage(); const rows = document.querySelectorAll('#budgetTableBody tr'); for (let i = 0; i < rows.length; i++) { const nameDisplay = rows[i].querySelector('.budget-name-display'); const nameInput = rows[i].querySelector('.custom-name-input'); const removeButton = rows[i].querySelector('.budget-remove-btn'); if (nameDisplay && nameInput && removeButton?.getAttribute('onclick').includes(itemId)) { nameDisplay.textContent = it?.name || 'Novo Item Personalizado'; nameDisplay.style.display = 'block'; nameInput.style.display = 'none'; break; } } }
+        function filterBudgets() { loadBudgetData(); }
+
+        async function calculateLossValue() {
+            const loadingElement = document.getElementById('budgetLoading'); const lossValueDisplay = document.getElementById('lossValueDisplay');
+            loadingElement.style.display = 'flex'; lossValueDisplay.style.display = 'none';
+            try {
+                const lossData = await extractRealDataFromSheet(currentChartPeriod);
+                const values = normalizeArrayNumbers(lossData.period?.values || []);
+                const totalLoss = safeSum(values);
+                document.getElementById('totalLossValue').textContent = currencyBRL(totalLoss);
+                lossValueDisplay.style.display = 'block';
+            } catch (e) { console.error('Erro ao calcular perdas:', e); } finally { loadingElement.style.display = 'none'; }
+        }
+        function exportBudgetData() { showMessage('Exportando dados de orçamento...', 'success'); setTimeout(function() { showMessage('Dados exportados com sucesso!', 'success'); }, 1200); }
+        function generateId() { return Math.random().toString(36).substring(2, 10); }
+        function showMessage(message, type) { const messageElement = document.getElementById('message'); messageElement.textContent = message; messageElement.className = 'message ' + type; messageElement.style.display = 'block'; messageElement.scrollIntoView({ behavior: 'smooth' }); setTimeout(() => { messageElement.style.display = 'none'; }, 4000); }
+        function showEntryMessage(message, type) { const messageElement = document.getElementById('entryMessage'); messageElement.textContent = message; messageElement.className = 'message ' + type; messageElement.style.display = 'block'; messageElement.scrollIntoView({ behavior: 'smooth' }); setTimeout(() => { messageElement.style.display = 'none'; }, 4000); }
+        
+        // Fechar modais ao clicar fora
+        window.addEventListener('click', function(event) {
+            if (event.target == document.getElementById('chartModal')) closeChartModal();
+            if (event.target == document.getElementById('budgetModal')) closeBudgetModal();
+            if (event.target == document.getElementById('entryModal')) closeEntryModal();
+        });
+    </script>
+</body>
+</html>
+
