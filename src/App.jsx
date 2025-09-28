@@ -9,6 +9,7 @@ import UserProfilePage from './components/UserProfilePage';
 import { initializeUser } from './utils/userUtils';
 import OrdersPage from './components/OrdersPage';
 import UserOrdersPage from './components/UserOrdersPage';
+import SupabaseTest from './components/SupabaseTest';
 
 function App() {
   useEffect(() => {
@@ -25,6 +26,7 @@ function App() {
         <Route path="/profile" element={<UserProfilePage />} />
          <Route path="/orders" element={<OrdersPage />} />
          <Route path="/my-orders" element={<UserOrdersPage />} />
+         <Route path="/supabase-test" element={<SupabaseTest />} />
     </Routes>
   );
 }
